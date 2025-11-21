@@ -12,8 +12,9 @@ fn test_tuple_1() {
     *tuple.get_mut() = 10u8;
     assert_eq!(tuple, (10u8,));
 
-    // Test set
-    tuple.set(20u8);
+    // Test replace
+    let old = tuple.replace(20u8);
+    assert_eq!(old, 10u8);
     assert_eq!(tuple, (20u8,));
 
     // Test map
@@ -36,9 +37,9 @@ fn test_tuple_2() {
     *tuple.get_mut() = 20u16;
     assert_eq!(tuple, (10u8, 20u16));
 
-    // Test set
-    tuple.set(30u8);
-    tuple.set(40u16);
+    // Test replace
+    tuple.replace(30u8);
+    tuple.replace(40u16);
     assert_eq!(tuple, (30u8, 40u16));
 
     // Test map
@@ -84,11 +85,11 @@ fn test_tuple_4() {
 fn test_tuple_5() {
     let mut tuple = (1u8, 2u16, 3u32, 4u64, 5i8);
 
-    tuple.set(10u8);
-    tuple.set(20u16);
-    tuple.set(30u32);
-    tuple.set(40u64);
-    tuple.set(-5i8);
+    tuple.replace(10u8);
+    tuple.replace(20u16);
+    tuple.replace(30u32);
+    tuple.replace(40u64);
+    tuple.replace(-5i8);
     assert_eq!(tuple, (10u8, 20u16, 30u32, 40u64, -5i8));
 }
 
@@ -125,18 +126,15 @@ fn test_tuple_7() {
 fn test_tuple_8() {
     let mut tuple = (1u8, 2u16, 3u32, 4u64, 5i8, 6i16, 7i32, 8i64);
 
-    tuple.set(10u8);
-    tuple.set(20u16);
-    tuple.set(30u32);
-    tuple.set(40u64);
-    tuple.set(50i8);
-    tuple.set(60i16);
-    tuple.set(70i32);
-    tuple.set(80i64);
-    assert_eq!(
-        tuple,
-        (10u8, 20u16, 30u32, 40u64, 50i8, 60i16, 70i32, 80i64)
-    );
+    tuple.replace(10u8);
+    tuple.replace(20u16);
+    tuple.replace(30u32);
+    tuple.replace(40u64);
+    tuple.replace(50i8);
+    tuple.replace(60i16);
+    tuple.replace(70i32);
+    tuple.replace(80i64);
+    assert_eq!(tuple, (10u8, 20u16, 30u32, 40u64, 50i8, 60i16, 70i32, 80i64));
 }
 
 #[test]
@@ -163,12 +161,7 @@ fn test_tuple_10() {
     tuple.map(|x: i64| x + 1);
     tuple.map(|x: f32| x + 1.0);
     tuple.map(|x: f64| x + 1.0);
-    assert_eq!(
-        tuple,
-        (
-            2u8, 3u16, 4u32, 5u64, 6i8, 7i16, 8i32, 9i64, 10.0f32, 11.0f64
-        )
-    );
+    assert_eq!(tuple, (2u8, 3u16, 4u32, 5u64, 6i8, 7i16, 8i32, 9i64, 10.0f32, 11.0f64));
 }
 
 // Additional edge case tests

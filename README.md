@@ -23,7 +23,7 @@ let mut tuple: (usize, u32, Option<u32>, Option<i32>, Option<i64>) = Default::de
 // Mutate the `usize` element.
 tuple.map(|el: usize| el + 10);;
 // Assign the `Type` prefixed elements.
-tuple.set(78u32);
+tuple.replace(78u32);
 *tuple.get_mut() = Some(56u32);
 *tuple.get_mut() = Some(78i32);
 

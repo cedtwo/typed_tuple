@@ -14,6 +14,9 @@ categories = ["data-structures", "rust-patterns"]
 default = []
 len_128 = []
 
+[dependencies]
+typed_tuple_macros = { path = "typed_tuple_macros" }
+
 [workspace.lints.rust]
 missing_docs = "forbid"
 unused_macro_rules = "forbid"
