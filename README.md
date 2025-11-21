@@ -13,26 +13,58 @@ Type based operations on primitive tuple elements, with`no_std` compatibility an
 
 `typed_tuple` allows for type safe operations on primitive tuple elements. In most cases, operations can be performed without specifying an index. Traits relying on the `TypedTuple` trait unfortunately do require index specification for disambiguation.
 
-The main purpose of this crate is to simplfy small arbitrary operations on heterogenous sequences. In the example below, elements of a tuple are assigned and retrieved irrespective of indices:
+The main purpose of this crate is to simplfy small arbitrary operations on heterogenous sequences.
+
+### Basic Operations
 
 ```rust
 use typed_tuple::TypedTuple;
 
-let mut tuple: (usize, u32, Option<u32>, Option<i32>, Option<i64>) = Default::default();
+let mut tuple: (i32, f64, String) = (0, 0.0, String::new());
 
-// Mutate the `usize` element.
-tuple.map(|el: usize| el + 10);;
-// Assign the `Type` prefixed elements.
-tuple.replace(78u32);
-*tuple.get_mut() = Some(56u32);
-*tuple.get_mut() = Some(78i32);
+// Get and modify elements by type
+*tuple.get_mut() = 42i32;
+*tuple.get_mut() = 3.14f64;
+*tuple.get_mut() = "hello".to_string();
 
-// Pass elements to their respective consumers.
-if let Some(element) = tuple.get() { std::hint::black_box::<u32>(*element); }
-if let Some(element) = tuple.get() { std::hint::black_box::<i32>(*element); }
-if let Some(element) = tuple.get() { std::hint::black_box::<i64>(*element); }
+// Map elements with closures
+tuple.map(|x: i32| x * 2);
 
-assert_eq!(tuple, (10, 78, Some(56), Some(78), None));
+// Replace values
+let old_value = tuple.replace(2.718f64);
+assert_eq!(old_value, 3.14);
+
+assert_eq!(tuple, (84, 2.718, "hello".to_string()));
+```
+
+### Advanced Operations
+
+```rust
+use typed_tuple::TypedTuple;
+
+let tuple = (1u8, 2u16, 3u32, 4u64);
+
+// Pop element by type
+let (popped, rest): (u32, _) = tuple.pop();
+assert_eq!(popped, 3u32);
+assert_eq!(rest, (1u8, 2u16, 4u64));
+
+// Swap elements at different indices (same type)
+let mut tuple = (1u32, "hello", 2u32, 'x', 3u32);
+TypedTuple::<0, u32>::swap::<2>(&mut tuple);
+assert_eq!(tuple, (2u32, "hello", 1u32, 'x', 3u32));
+
+// Split tuple at a specific index
+let tuple = (1u8, 2u16, 3u32, 4u64, 5i8);
+let (left, right) = TypedTuple::<2, u32>::split_at(tuple);
+assert_eq!(left, (1u8, 2u16, 3u32));
+assert_eq!(right, (4u64, 5i8));
+
+// Take element, replacing with default
+let mut tuple = (String::from("hello"), 42i32, 3.14f64);
+let value: String = tuple.take();
+assert_eq!(value, "hello");
+assert_eq!(tuple, (String::new(), 42, 3.14));
 ```
 
 ## Limitations

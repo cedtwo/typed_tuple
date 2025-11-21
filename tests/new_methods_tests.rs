@@ -2,18 +2,18 @@ use typed_tuple::TypedTuple;
 
 #[test]
 fn test_replace_first() {
-    let mut tuple = ("hello", 42, 3.14);
+    let mut tuple = ("hello", 42, 2.5);
     let old: &str = tuple.replace("world");
     assert_eq!(old, "hello");
-    assert_eq!(tuple, ("world", 42, 3.14));
+    assert_eq!(tuple, ("world", 42, 2.5));
 }
 
 #[test]
 fn test_replace_middle() {
-    let mut tuple = ("hello", 42, 3.14);
+    let mut tuple = ("hello", 42, 2.5);
     let old = TypedTuple::<1, _>::replace(&mut tuple, 99);
     assert_eq!(old, 42);
-    assert_eq!(tuple, ("hello", 99, 3.14));
+    assert_eq!(tuple, ("hello", 99, 2.5));
 }
 
 #[test]
@@ -40,20 +40,20 @@ fn test_swap_no_op_same_index() {
 
 #[test]
 fn test_swap_strings() {
-    let mut tuple = ("a", 42, "b", 3.14, "c");
+    let mut tuple = ("a", 42, "b", 2.5, "c");
     TypedTuple::<0, &str>::swap::<2>(&mut tuple);
-    assert_eq!(tuple, ("b", 42, "a", 3.14, "c"));
+    assert_eq!(tuple, ("b", 42, "a", 2.5, "c"));
 
     TypedTuple::<2, &str>::swap::<4>(&mut tuple);
-    assert_eq!(tuple, ("b", 42, "c", 3.14, "a"));
+    assert_eq!(tuple, ("b", 42, "c", 2.5, "a"));
 }
 
 #[test]
 fn test_take_string() {
-    let mut tuple = (String::from("hello"), 42, 3.14);
+    let mut tuple = (String::from("hello"), 42, 2.5);
     let s: String = tuple.take();
     assert_eq!(s, "hello");
-    assert_eq!(tuple, (String::new(), 42, 3.14));
+    assert_eq!(tuple, (String::new(), 42, 2.5));
 }
 
 #[test]
@@ -74,10 +74,10 @@ fn test_take_number() {
 
 #[test]
 fn test_split_at_first() {
-    let tuple = ("hello", 42, 3.14, 'x', true);
+    let tuple = ("hello", 42, 2.5, 'x', true);
     let (left, right) = TypedTuple::<0, &str>::split_at(tuple);
     assert_eq!(left, ("hello",));
-    assert_eq!(right, (42, 3.14, 'x', true));
+    assert_eq!(right, (42, 2.5, 'x', true));
 }
 
 #[test]
