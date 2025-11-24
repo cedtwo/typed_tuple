@@ -498,6 +498,14 @@ pub trait TypedTupleExt<T>: Sized {
 
 impl<T, TT> TypedTupleExt<T> for TT {}
 
+/// Trait for accessing the last element of a tuple by type.
+pub trait TypedLast<T>: LastIndex + TypedTuple<<Self as LastIndex>::Last, T>
+{}
+
+impl<T, TT> TypedLast<T> for TT where
+    TT: LastIndex + TypedTuple<<TT as LastIndex>::Last, T>
+{}
+
 // Generate all tuple implementations using the proc macro
 #[cfg(not(feature = "len_128"))]
 typed_tuple_macros::generate_typed_tuple_impls!(64);
