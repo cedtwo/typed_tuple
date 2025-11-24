@@ -219,6 +219,36 @@ pub trait TypedTuple<Idx, T> {
         f(self.get())
     }
 
+    /// Returns the outcome of the provided closure when applied to a mutable
+    /// reference to the element of type `T`.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// # use typed_tuple::*;
+    ///
+    /// let mut tuple = (10u32, 20u64);
+    /// let result = tuple.map_mut(|x: &mut u32| {
+    ///     *x += 5;
+    ///     *x * 2
+    /// });
+    /// assert_eq!(result, 30u32);
+    /// assert_eq!(tuple, (15u32, 20u64));
+    ///
+    /// let result = tuple.map_mut(|x: &mut u64| {
+    ///     *x *= 2;
+    ///     *x
+    /// });
+    /// assert_eq!(result, 40u64);
+    /// assert_eq!(tuple, (15u32, 40u64));
+    /// ```
+    fn map_mut<FN, R>(&mut self, f: FN) -> R
+    where
+        FN: FnOnce(&mut T) -> R,
+    {
+        f(self.get_mut())
+    }
+
     /// Removes and returns the element of type `T` from the tuple, along with
     /// the remaining tuple.
     ///
