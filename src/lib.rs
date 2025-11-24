@@ -64,9 +64,9 @@ pub trait TupleKey<Marker> {
 pub trait TypedTuple<Idx, T> {
     /// The type of the remaining tuple after popping element of type `T`.
     type PopOutput;
-    /// The type of the left tuple when splitting at INDEX (inclusive).
-    type SplitLeft;
-    /// The type of the right tuple when splitting at INDEX (inclusive).
+    /// The type of the left tuple when splitting at [.., INDEX].
+    type SplitLeft: TypedTuple<Idx, T>;
+    /// The type of the right tuple when splitting at (INDEX, ..].
     type SplitRight;
     /// The associated index.
     const INDEX: usize;
@@ -238,7 +238,10 @@ pub trait TypedTuple<Idx, T> {
     ///
     /// A tuple containing (left_tuple, right_tuple) where left_tuple contains
     /// elements from index 0 to INDEX (inclusive), and right_tuple contains
-    /// the remaining elements.
+    /// the remaining elements. The left tuple has length
+    /// INDEX + 1, and the right tuple has length total_length - (INDEX + 1).
+    /// The left tuple will `[.., INDEX]` and the right tuple will be
+    /// `(INDEX, ..]`, or analogously, `[INDEX + 1, ..]`.
     ///
     /// # Example
     ///
