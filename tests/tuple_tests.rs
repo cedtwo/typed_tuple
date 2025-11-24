@@ -19,8 +19,8 @@ fn test_tuple_1() {
     assert_eq!(old, 10u8);
     assert_eq!(tuple, (20u8,));
 
-    // Test map
-    tuple.map(|x: u8| x * 2);
+    // Test apply
+    tuple.apply(|x: &mut u8| *x *= 2);
     assert_eq!(tuple, (40u8,));
 }
 
@@ -44,9 +44,9 @@ fn test_tuple_2() {
     tuple.replace(40u16);
     assert_eq!(tuple, (30u8, 40u16));
 
-    // Test map
-    tuple.map(|x: u8| x * 2);
-    tuple.map(|x: u16| x * 2);
+    // Test apply
+    tuple.apply(|x: &mut u8| *x *= 2);
+    tuple.apply(|x: &mut u16| *x *= 2);
     assert_eq!(tuple, (60u8, 80u16));
 }
 
@@ -65,10 +65,10 @@ fn test_tuple_3() {
     *tuple.get_mut() = 30u32;
     assert_eq!(tuple, (10u8, 20u16, 30u32));
 
-    // Test map
-    tuple.map(|x: u8| x + 1);
-    tuple.map(|x: u16| x + 1);
-    tuple.map(|x: u32| x + 1);
+    // Test apply
+    tuple.apply(|x: &mut u8| *x += 1);
+    tuple.apply(|x: &mut u16| *x += 1);
+    tuple.apply(|x: &mut u32| *x += 1);
     assert_eq!(tuple, (11u8, 21u16, 31u32));
 }
 
@@ -99,12 +99,12 @@ fn test_tuple_5() {
 fn test_tuple_6() {
     let mut tuple = (1u8, 2u16, 3u32, 4u64, 5i8, 6i16);
 
-    tuple.map(|x: u8| x * 2);
-    tuple.map(|x: u16| x * 2);
-    tuple.map(|x: u32| x * 2);
-    tuple.map(|x: u64| x * 2);
-    tuple.map(|x: i8| x * 2);
-    tuple.map(|x: i16| x * 2);
+    tuple.apply(|x: &mut u8| *x *= 2);
+    tuple.apply(|x: &mut u16| *x *= 2);
+    tuple.apply(|x: &mut u32| *x *= 2);
+    tuple.apply(|x: &mut u64| *x *= 2);
+    tuple.apply(|x: &mut i8| *x *= 2);
+    tuple.apply(|x: &mut i16| *x *= 2);
     assert_eq!(tuple, (2u8, 4u16, 6u32, 8u64, 10i8, 12i16));
 }
 
@@ -153,16 +153,16 @@ fn test_tuple_9() {
 fn test_tuple_10() {
     let mut tuple = (1u8, 2u16, 3u32, 4u64, 5i8, 6i16, 7i32, 8i64, 9f32, 10f64);
 
-    tuple.map(|x: u8| x + 1);
-    tuple.map(|x: u16| x + 1);
-    tuple.map(|x: u32| x + 1);
-    tuple.map(|x: u64| x + 1);
-    tuple.map(|x: i8| x + 1);
-    tuple.map(|x: i16| x + 1);
-    tuple.map(|x: i32| x + 1);
-    tuple.map(|x: i64| x + 1);
-    tuple.map(|x: f32| x + 1.0);
-    tuple.map(|x: f64| x + 1.0);
+    tuple.apply(|x: &mut u8| *x += 1);
+    tuple.apply(|x: &mut u16| *x += 1);
+    tuple.apply(|x: &mut u32| *x += 1);
+    tuple.apply(|x: &mut u64| *x += 1);
+    tuple.apply(|x: &mut i8| *x += 1);
+    tuple.apply(|x: &mut i16| *x += 1);
+    tuple.apply(|x: &mut i32| *x += 1);
+    tuple.apply(|x: &mut i64| *x += 1);
+    tuple.apply(|x: &mut f32| *x += 1.0);
+    tuple.apply(|x: &mut f64| *x += 1.0);
     assert_eq!(tuple, (2u8, 3u16, 4u32, 5u64, 6i8, 7i16, 8i32, 9i64, 10.0f32, 11.0f64));
 }
 
@@ -217,11 +217,11 @@ fn test_const_index_access() {
 }
 
 #[test]
-fn test_map_with_string() {
+fn test_apply_with_string() {
     let mut tuple = ("hello".to_string(), 42u32);
 
-    tuple.map(|s: String| s.to_uppercase());
-    tuple.map(|n: u32| n * 2);
+    tuple.apply(|s: &mut String| *s = s.to_uppercase());
+    tuple.apply(|n: &mut u32| *n *= 2);
 
     assert_eq!(tuple, ("HELLO".to_string(), 84u32));
 }

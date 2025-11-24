@@ -60,6 +60,12 @@ pub trait TupleKey<Marker> {
     type Idx;
 }
 
+/// Trait for tuple index types.
+pub trait TupleIndex {
+    /// The associated index value.
+    const INDEX: usize;
+}
+
 /// Trait for tuple element manipulation by type.
 pub trait TypedTuple<Idx, T> {
     /// The type of the remaining tuple after popping element of type `T`.
@@ -76,8 +82,6 @@ pub trait TypedTuple<Idx, T> {
     /// The type of the right tuple when splitting inclusively (includes element
     /// at INDEX): [INDEX, ..].
     type SplitRightInclusive: TypedTuple<TupleIndex0, T>;
-    /// The associated index.
-    const INDEX: usize;
 
     /// Get a reference to the element of type `T`.
     /// # Example
@@ -144,22 +148,44 @@ pub trait TypedTuple<Idx, T> {
     /// # Example
     /// ```
     /// # use typed_tuple::*;
-    /// // Map by type.
+    /// // Apply by type.
     /// let mut tuple = ("a".to_string(), 1u8, 2usize);
-    /// tuple.map(|el: String| el.to_uppercase());
-    /// tuple.map(|el: u8| el + 1);
-    /// tuple.map(|el: usize| el + 2);
+    /// tuple.apply(|el: &mut String| *el = el.to_uppercase());
+    /// tuple.apply(|el: &mut u8| *el += 1);
+    /// tuple.apply(|el: &mut usize| *el += 2);
     /// assert_eq!(tuple, ("A".to_string(), 2, 4));
     ///
-    /// // Map by 'const' index.
-    /// TypedTuple::<TupleIndex0, _>::map(&mut tuple, |el| el.to_lowercase());
-    /// TypedTuple::<TupleIndex1, _>::map(&mut tuple, |el| el - 1);
-    /// TypedTuple::<TupleIndex2, _>::map(&mut tuple, |el| el - 2);
+    /// // Apply by 'const' index.
+    /// TypedTuple::<TupleIndex0, _>::apply(&mut tuple, |el| *el = el.to_lowercase());
+    /// TypedTuple::<TupleIndex1, _>::apply(&mut tuple, |el| *el -= 1);
+    /// TypedTuple::<TupleIndex2, _>::apply(&mut tuple, |el| *el -= 2);
     /// assert_eq!(tuple, ("a".to_string(), 1, 2))
     /// ```
-    fn map<FN: FnOnce(T) -> T>(&mut self, f: FN)
+    fn apply<FN: FnOnce(&mut T)>(&mut self, f: FN) {
+        f(self.get_mut());
+    }
+
+    /// Returns the outcome of the provided closure when applied to the element
+    /// of type `T`.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// # use typed_tuple::*;
+    ///
+    /// let tuple = (10u32, 20u64);
+    /// let result = tuple.map(|x: &u32| x * 2);
+    /// assert_eq!(result, 20u32);
+    ///
+    /// let result = tuple.map(|x: &u64| x + 5);
+    /// assert_eq!(result, 25u64);
+    /// ```
+    fn map<FN, R>(&self, f: FN) -> R
     where
-        T: Default;
+        FN: FnOnce(&T) -> R,
+    {
+        f(self.get())
+    }
 
     /// Removes and returns the element of type `T` from the tuple, along with
     /// the remaining tuple.
@@ -204,8 +230,10 @@ pub trait TypedTuple<Idx, T> {
     fn swap<Other>(&mut self)
     where
         Self: TypedTuple<Other, T>,
+        Idx: TupleIndex,
+        Other: TupleIndex,
     {
-        if <Self as TypedTuple<Idx, T>>::INDEX != <Self as TypedTuple<Other, T>>::INDEX {
+        if Idx::INDEX != Other::INDEX {
             unsafe {
                 let ptr = self as *mut Self;
                 let field1 = <Self as TypedTuple<Idx, T>>::get_mut(&mut *ptr);
@@ -325,6 +353,118 @@ pub trait TypedTuple<Idx, T> {
     where
         T: Clone;
 }
+
+/// Extension trait to add additional methods to TypedTuple.
+pub trait TypedTupleExt<T>: Sized {
+    #[inline]
+    /// Pops the element of type `T` from the tuple, returning it along with
+    /// the remaining tuple.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// # use typed_tuple::*;
+    /// let mut tuple = (1u8, 2u16, 3u32);
+    /// let (val, rest) = tuple.pop_at::<TupleIndex2>();
+    /// assert_eq!(val, 3u32);
+    /// assert_eq!(rest, (1u8, 2u16));
+    /// ```
+    fn pop_at<Idx>(self) -> (T, Self::PopOutput)
+    where
+        Self: TypedTuple<Idx, T>,
+    {
+        <Self as TypedTuple<Idx, T>>::pop(self)
+    }
+
+    #[inline]
+    /// Swaps the element of type `T` at Idx with the element at Other.
+    ///
+    /// Both indices must contain elements of type `T`. If Idx == Other,
+    /// this is a no-op.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// # use typed_tuple::*;
+    /// let mut tuple = (1u32, "hello", 2u32, 'x', 3u32);
+    /// tuple.swap_at::<TupleIndex0, TupleIndex2>();
+    /// assert_eq!(tuple, (2u32, "hello", 1u32, 'x', 3u32));
+    /// ```
+    fn swap_at<Idx, Other>(&mut self)
+    where
+        Self: TypedTuple<Idx, T> + TypedTuple<Other, T>,
+        Idx: TupleIndex,
+        Other: TupleIndex,
+    {
+        <Self as TypedTuple<Idx, T>>::swap::<Other>(self);
+    }
+
+    #[inline]
+    /// Splits the tuple at Idx (inclusive left), returning two tuples.
+    ///
+    /// The element at Idx is included in the left tuple.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// # use typed_tuple::*;
+    /// let tuple = (1u8, 2u16, 3u32, 4u64, 5i8);
+    /// let (left, right) = tuple.split_left_at::<TupleIndex2>();
+    /// assert_eq!(left, (1u8, 2u16, 3u32));
+    /// assert_eq!(right, (4u64, 5i8));
+    /// ```
+    fn split_left_at<Idx>(self) -> (Self::SplitLeftInclusive, Self::SplitRightExclusive)
+    where
+        Self: TypedTuple<Idx, T>,
+    {
+        <Self as TypedTuple<Idx, T>>::split_left(self)
+    }
+
+    #[inline]
+    /// Splits the tuple at Idx (inclusive right), returning two tuples.
+    ///
+    /// The element at Idx is included in the right tuple.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// # use typed_tuple::*;
+    /// let tuple = (1u8, 2u16, 3u32, 4u64, 5i8);
+    /// let (left, right) = tuple.split_right_at::<TupleIndex2>();
+    /// assert_eq!(left, (1u8, 2u16));
+    /// assert_eq!(right, (3u32, 4u64, 5i8));
+    /// ```
+    fn split_right_at<Idx>(self) -> (Self::SplitLeftExclusive, Self::SplitRightInclusive)
+    where
+        Self: TypedTuple<Idx, T>,
+    {
+        <Self as TypedTuple<Idx, T>>::split_right(self)
+    }
+
+    #[inline]
+    /// Splits the tuple at Idx (inclusive both), returning two tuples.
+    ///
+    /// The element at Idx is included in both tuples (cloned).
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// # use typed_tuple::*;
+    /// let tuple = (1u8, 2u16, 3u32, 4u64, 5i8);
+    /// let (left, right) = tuple.split_inclusive_at::<TupleIndex2>();
+    /// assert_eq!(left, (1u8, 2u16, 3u32));
+    /// assert_eq!(right, (3u32, 4u64, 5i8));
+    /// ```
+    fn split_inclusive_at<Idx>(self) -> (Self::SplitLeftInclusive, Self::SplitRightInclusive)
+    where
+        Self: TypedTuple<Idx, T>,
+        T: Clone,
+    {
+        <Self as TypedTuple<Idx, T>>::split_inclusive(self)
+    }
+}
+
+impl<T, TT> TypedTupleExt<T> for TT {}
 
 // Generate all tuple implementations using the proc macro
 #[cfg(not(feature = "len_128"))]

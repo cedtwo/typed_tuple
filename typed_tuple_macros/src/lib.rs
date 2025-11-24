@@ -26,6 +26,10 @@ pub fn generate_typed_tuple_impls(input: TokenStream) -> TokenStream {
         impls.push(quote! {
             #[doc = #documentation]
             pub struct #marker_ident;
+
+            impl TupleIndex for #marker_ident {
+                const INDEX: usize = #index;
+            }
         });
     }
 
@@ -61,7 +65,6 @@ pub fn generate_typed_tuple_impls(input: TokenStream) -> TokenStream {
                     type SplitLeftInclusive = (#(#split_left_inclusive_types,)*);
                     type SplitRightExclusive = (#(#split_right_exclusive_types,)*);
                     type SplitRightInclusive = (#(#split_right_inclusive_types,)*);
-                    const INDEX: usize = #index;
 
                     #[inline]
                     fn get(&self) -> &#target_type {
@@ -70,13 +73,6 @@ pub fn generate_typed_tuple_impls(input: TokenStream) -> TokenStream {
                     #[inline]
                     fn get_mut(&mut self) -> &mut #target_type {
                         &mut self.#index_lit
-                    }
-                    #[inline]
-                    fn map<FN: FnOnce(#target_type) -> #target_type>(&mut self, f: FN)
-                    where
-                        #target_type: Default
-                    {
-                        self.#index_lit = f(core::mem::take(&mut self.#index_lit));
                     }
                     #[inline]
                     fn pop(self) -> (#target_type, Self::PopOutput) {

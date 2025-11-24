@@ -27,8 +27,8 @@ let mut tuple: (i32, f64, String) = (0, 0.0, String::new());
 *tuple.get_mut() = 3.14f64;
 *tuple.get_mut() = "hello".to_string();
 
-// Map elements with closures
-tuple.map(|x: i32| x * 2);
+// Apply transformations with closures
+tuple.apply(|x: &mut i32| *x *= 2);
 
 // Replace values
 let old_value = tuple.replace(2.718f64);
