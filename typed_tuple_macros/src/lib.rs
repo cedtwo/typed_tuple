@@ -52,11 +52,13 @@ pub fn generate_last_index_impls(_input: TokenStream) -> TokenStream {
     for size in 1..=MAX_SIZE {
         let type_params: Vec<_> = (0..size).map(|i| quote::format_ident!("T{}", i)).collect();
         let last_index = size - 1;
+        let last_type = &type_params[last_index];
         let last_marker = quote::format_ident!("TupleIndex{}", last_index);
 
         impls.push(quote! {
             impl<#(#type_params),*> LastIndex for (#(#type_params,)*) {
                 type Last = #last_marker;
+                type LastType = #last_type;
             }
         });
     }
@@ -67,12 +69,12 @@ pub fn generate_last_index_impls(_input: TokenStream) -> TokenStream {
     .into()
 }
 
-/// Generates ChainTuple trait implementations for all tuple size combinations
+/// Generates ChainRight trait implementations for all tuple size combinations
 #[proc_macro]
-pub fn generate_chain_tuple_impls(_input: TokenStream) -> TokenStream {
+pub fn generate_chain_right_impls(_input: TokenStream) -> TokenStream {
     let mut impls = Vec::new();
 
-    // Generate ChainTuple implementations for all combinations of tuple sizes
+    // Generate ChainRight implementations for all combinations of tuple sizes
     for left_size in 0..=MAX_SIZE {
         for right_size in 0..=MAX_SIZE {
             let total_size = left_size + right_size;
@@ -85,27 +87,17 @@ pub fn generate_chain_tuple_impls(_input: TokenStream) -> TokenStream {
             let right_params: Vec<_> =
                 (0..right_size).map(|i| quote::format_ident!("R{}", i)).collect();
 
-            let left_tuple = if left_size == 0 {
-                quote! { () }
-            } else {
-                quote! { (#(#left_params,)*) }
-            };
-
-            let right_tuple = if right_size == 0 {
-                quote! { () }
-            } else {
-                quote! { (#(#right_params,)*) }
-            };
-
-            let output_tuple = if total_size == 0 {
-                quote! { () }
-            } else {
-                quote! { (#(#left_params,)* #(#right_params,)*) }
-            };
+            let left_indices: Vec<_> = (0..left_size).map(syn::Index::from).collect();
+            let right_indices: Vec<_> = (0..right_size).map(syn::Index::from).collect();
 
             impls.push(quote! {
-                impl<#(#left_params,)* #(#right_params,)*> ChainTuple<#right_tuple> for #left_tuple {
-                    type Output = #output_tuple;
+                impl<#(#left_params,)* #(#right_params,)*> ChainRight<(#(#right_params,)*)> for (#(#left_params,)*) {
+                    type Output = (#(#left_params,)* #(#right_params,)*);
+
+                    #[inline]
+                    fn chain_right(self, right: (#(#right_params,)*)) -> Self::Output {
+                        (#(self.#left_indices,)* #(right.#right_indices,)*)
+                    }
                 }
             });
         }
@@ -132,20 +124,18 @@ pub fn generate_typed_tuple_impls(_input: TokenStream) -> TokenStream {
             let index_lit = syn::Index::from(index);
 
             // Build type lists for split operations
-            let split_left_exclusive_types: Vec<_> = type_params.iter().take(index).collect();
-            let split_right_exclusive_types: Vec<_> = type_params.iter().skip(index + 1).collect();
-
-            let split_left_exclusive_indices: Vec<_> = (0..index).map(syn::Index::from).collect();
-            let split_right_exclusive_indices: Vec<_> =
-                ((index + 1)..size).map(syn::Index::from).collect();
+            let split_left_exclusive_types = type_params.iter().take(index);
+            let split_right_exclusive_types = type_params.iter().skip(index + 1);
+            let split_left_exclusive_indices = (0..index).map(syn::Index::from);
+            let split_right_exclusive_indices = ((index + 1)..size).map(syn::Index::from);
 
             impls.push(quote! {
                 impl<#(#type_params),*> TypedTuple<#index_marker, #target_type> for (#(#type_params,)*) {
-                    type PopOutput = <Self::SplitLeftExclusive as ChainTuple<Self::SplitRightExclusive>>::Output;
+                    type PopOutput = <Self::SplitLeftExclusive as ChainRight<Self::SplitRightExclusive>>::Output;
                     type SplitLeftExclusive = (#(#split_left_exclusive_types,)*);
-                    type SplitLeftInclusive = <Self::SplitLeftExclusive as ChainTuple<(#target_type,)>>::Output;
+                    type SplitLeftInclusive = <Self::SplitLeftExclusive as ChainRight<(#target_type,)>>::Output;
                     type SplitRightExclusive = (#(#split_right_exclusive_types,)*);
-                    type SplitRightInclusive = <(#target_type,) as ChainTuple<Self::SplitRightExclusive>>::Output;
+                    type SplitRightInclusive = <(#target_type,) as ChainRight<Self::SplitRightExclusive>>::Output;
 
                     #[inline]
                     fn get(&self) -> &#target_type {
@@ -156,22 +146,14 @@ pub fn generate_typed_tuple_impls(_input: TokenStream) -> TokenStream {
                         &mut self.#index_lit
                     }
                     #[inline]
-                    fn pop(self) -> (#target_type, Self::PopOutput) {
-                        (self.#index_lit, (#(self.#split_left_exclusive_indices,)* #(self.#split_right_exclusive_indices,)*))
-                    }
-                    #[inline]
-                    fn split_left(self) -> (Self::SplitLeftInclusive, Self::SplitRightExclusive) {
-                        ((#(self.#split_left_exclusive_indices,)* self.#index_lit,), (#(self.#split_right_exclusive_indices,)*))
-                    }
-                    #[inline]
-                    fn split_right(self) -> (Self::SplitLeftExclusive, Self::SplitRightInclusive) {
-                        ((#(self.#split_left_exclusive_indices,)*), (self.#index_lit, #(self.#split_right_exclusive_indices,)*))
+                    fn split_exclusive(self) -> (Self::SplitLeftExclusive, #target_type, Self::SplitRightExclusive) {
+                        ((#(self.#split_left_exclusive_indices,)*), self.#index_lit, (#(self.#split_right_exclusive_indices,)*))
                     }
                 }
             });
         }
     }
-    
+
     quote! {
         #(#impls)*
     }

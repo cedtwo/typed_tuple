@@ -3,7 +3,7 @@
 #![cfg_attr(feature = "len_128", recursion_limit = "256")]
 
 mod chain;
-pub use chain::ChainTuple;
+pub use chain::{ChainLeft, ChainRight};
 
 /// Helper trait to associate a marker type with a tuple index.
 ///
@@ -99,6 +99,8 @@ pub trait TupleIndex {
 pub trait LastIndex {
     /// The index marker type for the last element of this tuple.
     type Last: TupleIndex;
+    /// The type of the last element in the tuple.
+    type LastType;
 }
 
 /// Trait for tuple element manipulation by type.
@@ -107,7 +109,9 @@ pub trait TypedTuple<Idx, T>: Sized {
     type PopOutput;
     /// The type of the left tuple when splitting exclusively (excludes element
     /// at INDEX): [.., INDEX).
-    type SplitLeftExclusive;
+    type SplitLeftExclusive: ChainRight<(T,), Output = Self::SplitLeftInclusive>
+        + ChainRight<Self::SplitRightExclusive, Output = Self::PopOutput>
+        + ChainRight<Self::SplitRightInclusive, Output = Self>;
     /// The type of the left tuple when splitting inclusively (includes element
     /// at INDEX): [.., INDEX].
     type SplitLeftInclusive: TypedTuple<
@@ -115,10 +119,12 @@ pub trait TypedTuple<Idx, T>: Sized {
             T,
             SplitLeftExclusive = Self::SplitLeftExclusive,
             SplitRightInclusive = (T,),
-        >;
+        > + ChainRight<Self::SplitRightExclusive, Output = Self>;
     /// The type of the right tuple when splitting exclusively (excludes element
     /// at INDEX): (INDEX, ..].
-    type SplitRightExclusive;
+    type SplitRightExclusive: ChainLeft<(T,), Output = Self::SplitRightInclusive>
+        + ChainLeft<Self::SplitLeftExclusive, Output = Self::PopOutput>
+        + ChainLeft<Self::SplitLeftInclusive, Output = Self>;
     /// The type of the right tuple when splitting inclusively (includes element
     /// at INDEX): [INDEX, ..].
     type SplitRightInclusive: TypedTuple<
@@ -126,7 +132,7 @@ pub trait TypedTuple<Idx, T>: Sized {
             T,
             SplitRightExclusive = Self::SplitRightExclusive,
             SplitLeftInclusive = (T,),
-        >;
+        > + ChainLeft<Self::SplitLeftExclusive, Output = Self>;
 
     /// Get a reference to the element of type `T`.
     /// # Example
@@ -286,7 +292,10 @@ pub trait TypedTuple<Idx, T>: Sized {
     /// assert_eq!(c, 'b');
     /// assert_eq!(rest, ("a", 2usize));
     /// ```
-    fn pop(self) -> (T, Self::PopOutput);
+    fn pop(self) -> (T, Self::PopOutput) {
+        let (left, element, right) = self.split_exclusive();
+        (element, left.chain_right(right))
+    }
 
     #[inline]
     /// Swaps the element at INDEX with the element at OTHER_INDEX.
@@ -341,7 +350,6 @@ pub trait TypedTuple<Idx, T>: Sized {
         core::mem::take(self.get_mut())
     }
 
-    #[inline]
     /// Splits the tuple exclusively at INDEX, returning the element and the
     /// surrounding tuples.
     ///
@@ -362,12 +370,9 @@ pub trait TypedTuple<Idx, T>: Sized {
     /// assert_eq!(element, 3u32);
     /// assert_eq!(right, (4u64, 5i8));
     /// ```
-    fn split_exclusive(self) -> (Self::SplitLeftExclusive, T, Self::SplitRightExclusive) {
-        let (left, right_exclusive) = self.split_left();
-        let (left_exclusive, (element,)): (_, (T,)) = left.split_right();
-        (left_exclusive, element, right_exclusive)
-    }
+    fn split_exclusive(self) -> (Self::SplitLeftExclusive, T, Self::SplitRightExclusive);
 
+    #[inline]
     /// Splits the tuple at INDEX (inclusive left), returning two tuples.
     ///
     /// The element at INDEX is included in the left tuple.
@@ -387,8 +392,12 @@ pub trait TypedTuple<Idx, T>: Sized {
     /// assert_eq!(left, (1u8, 2u16, 3u32));
     /// assert_eq!(right, (4u64, 5i8));
     /// ```
-    fn split_left(self) -> (Self::SplitLeftInclusive, Self::SplitRightExclusive);
+    fn split_left(self) -> (Self::SplitLeftInclusive, Self::SplitRightExclusive) {
+        let (left_exclusive, element, right_exclusive) = self.split_exclusive();
+        (left_exclusive.chain_right((element,)), right_exclusive)
+    }
 
+    #[inline]
     /// Splits the tuple at INDEX (inclusive right), returning two tuples.
     ///
     /// The element at INDEX is included in the right tuple.
@@ -408,7 +417,38 @@ pub trait TypedTuple<Idx, T>: Sized {
     /// assert_eq!(left, (1u8, 2u16));
     /// assert_eq!(right, (3u32, 4u64, 5i8));
     /// ```
-    fn split_right(self) -> (Self::SplitLeftExclusive, Self::SplitRightInclusive);
+    fn split_right(self) -> (Self::SplitLeftExclusive, Self::SplitRightInclusive) {
+        let (left_exclusive, element, right_exclusive) = self.split_exclusive();
+        (left_exclusive, right_exclusive.chain_left((element,)))
+    }
+
+    #[inline]
+    /// Splits the tuple at INDEX (inclusive both sides), returning two tuples.
+    ///
+    /// The element at INDEX is cloned and included in both tuples.
+    ///
+    /// # Returns
+    ///
+    /// A tuple containing (left_inclusive, right_inclusive) where:
+    /// - `left_inclusive` contains elements [0..=INDEX]
+    /// - `right_inclusive` contains elements [INDEX..]
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// # use typed_tuple::*;
+    /// let tuple = (1u8, 2u16, 3u32, 4u64, 5i8);
+    /// let (left, right) = TypedTuple::<TupleIndex2, u32>::split_inclusive(tuple);
+    /// assert_eq!(left, (1u8, 2u16, 3u32));
+    /// assert_eq!(right, (3u32, 4u64, 5i8));
+    /// ```
+    fn split_inclusive(self) -> (Self::SplitLeftInclusive, Self::SplitRightInclusive)
+    where
+        T: Clone,
+    {
+        let (left_exclusive, element, right_exclusive) = self.split_exclusive();
+        (left_exclusive.chain_right((element.clone(),)), right_exclusive.chain_left((element,)))
+    }
 }
 
 /// Extension trait to add additional methods to TypedTuple.
@@ -496,6 +536,27 @@ pub trait TypedTupleExt<T>: Sized {
         Self: TypedTuple<Idx, T>,
     {
         <Self as TypedTuple<Idx, T>>::split_right(self)
+    }
+
+    #[inline]
+    /// Splits the tuple at Idx (inclusive both sides), returning two tuples.
+    ///
+    /// The element at Idx is cloned and included in both tuples.
+    ///
+    /// # Example
+    /// ```
+    /// # use typed_tuple::*;
+    /// let tuple = (1u8, 2u16, 3u32, 4u64, 5i8);
+    /// let (left, right) = tuple.split_inclusive_at::<TupleIndex2>();
+    /// assert_eq!(left, (1u8, 2u16, 3u32));
+    /// assert_eq!(right, (3u32, 4u64, 5i8));
+    /// ```
+    fn split_inclusive_at<Idx>(self) -> (Self::SplitLeftInclusive, Self::SplitRightInclusive)
+    where
+        Self: TypedTuple<Idx, T>,
+        T: Clone,
+    {
+        <Self as TypedTuple<Idx, T>>::split_inclusive(self)
     }
 }
 
