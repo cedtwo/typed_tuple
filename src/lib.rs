@@ -663,13 +663,42 @@ impl<T, TT> TypedTupleExt<T> for TT {}
 /// This trait is implemented for tuples where the last element is of type `T`.
 /// It combines the functionality of `LastIndex` and `TypedTuple` to provide
 /// type-safe access to the last element.
+///
+/// # Examples
+///
+/// ```rust
+/// # use typed_tuple::*;
+/// fn get_last<TT: TypedLast<u32>>(tuple: &TT) -> &u32 {
+///     tuple.get()
+/// }
+///
+/// let tuple = (1u8, 2u16, 3u32);
+/// assert_eq!(*get_last(&tuple), 3u32);
+///
+/// let tuple2 = ("hello", 'x', 42u32);
+/// assert_eq!(*get_last(&tuple2), 42u32);
+/// ```
 pub trait TypedLast<T>:
-    LastIndex<LastType = T> + TypedTuple<<Self as LastIndex>::Last, <Self as LastIndex>::LastType>
+    LastIndex<LastType = T>
+    + TypedTuple<
+        <Self as LastIndex>::Last,
+        <Self as LastIndex>::LastType,
+        SplitRightInclusive = (T,),
+        SplitLeftInclusive = Self,
+        SplitRightExclusive = (),
+    >
 {
 }
 
 impl<T, TT> TypedLast<T> for TT where
-    TT: LastIndex<LastType = T> + TypedTuple<<TT as LastIndex>::Last, T>
+    TT: LastIndex<LastType = T>
+        + TypedTuple<
+            <TT as LastIndex>::Last,
+            T,
+            SplitRightInclusive = (T,),
+            SplitLeftInclusive = TT,
+            SplitRightExclusive = (),
+        >
 {
 }
 
@@ -678,9 +707,44 @@ impl<T, TT> TypedLast<T> for TT where
 /// This trait is implemented for tuples where the first element is of type `T`.
 /// It combines the functionality of `FirstIndex` and `TypedTuple` to provide
 /// type-safe access to the first element.
-pub trait TypedFirst<T>: FirstIndex<FirstType = T> + TypedTuple<TupleIndex0, T> {}
+///
+/// # Examples
+///
+/// ```rust
+/// # use typed_tuple::*;
+/// fn get_first<TT: TypedFirst<u32>>(tuple: &TT) -> &u32 {
+///     tuple.get()
+/// }
+///
+/// let tuple = (3u32, 2u16, 1u8);
+/// assert_eq!(*get_first(&tuple), 3u32);
+///
+/// let tuple2 = (42u32, "hello", 'x');
+/// assert_eq!(*get_first(&tuple2), 42u32);
+/// ```
+pub trait TypedFirst<T>:
+    FirstIndex<FirstType = T>
+    + TypedTuple<
+        TupleIndex0,
+        T,
+        SplitLeftInclusive = (T,),
+        SplitLeftExclusive = (),
+        SplitRightInclusive = Self,
+    >
+{
+}
 
-impl<T, TT> TypedFirst<T> for TT where TT: FirstIndex<FirstType = T> + TypedTuple<TupleIndex0, T> {}
+impl<T, TT> TypedFirst<T> for TT where
+    TT: FirstIndex<FirstType = T>
+        + TypedTuple<
+            TupleIndex0,
+            T,
+            SplitLeftInclusive = (T,),
+            SplitLeftExclusive = (),
+            SplitRightInclusive = TT,
+        >
+{
+}
 
 typed_tuple_macros::generate_index_markers!();
 typed_tuple_macros::generate_first_index_impls!();
