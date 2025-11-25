@@ -563,9 +563,19 @@ pub trait TypedTupleExt<T>: Sized {
 impl<T, TT> TypedTupleExt<T> for TT {}
 
 /// Trait for accessing the last element of a tuple by type.
-pub trait TypedLast<T>: LastIndex + TypedTuple<<Self as LastIndex>::Last, T> {}
+///
+/// This trait is implemented for tuples where the last element is of type `T`.
+/// It combines the functionality of `LastIndex` and `TypedTuple` to provide
+/// type-safe access to the last element.
+pub trait TypedLast<T>:
+    LastIndex<LastType = T> + TypedTuple<<Self as LastIndex>::Last, <Self as LastIndex>::LastType>
+{
+}
 
-impl<T, TT> TypedLast<T> for TT where TT: LastIndex + TypedTuple<<TT as LastIndex>::Last, T> {}
+impl<T, TT> TypedLast<T> for TT where
+    TT: LastIndex<LastType = T> + TypedTuple<<TT as LastIndex>::Last, T>
+{
+}
 
 typed_tuple_macros::generate_index_markers!();
 typed_tuple_macros::generate_last_index_impls!();
