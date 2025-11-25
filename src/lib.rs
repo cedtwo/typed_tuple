@@ -64,9 +64,60 @@ pub trait TupleKey<Marker> {
 }
 
 /// Trait for tuple index types.
-pub trait TupleIndex {
+pub trait TupleIndex:
+    Sized
+    + TupleIndexSub<Self, Output = TupleIndex0>
+    + TupleIndexSub<TupleIndex0, Output = Self>
+    + TupleIndexAdd<TupleIndex0, Output = Self>
+{
     /// The associated index value.
     const INDEX: usize;
+}
+
+/// Trait for adding two tuple indices.
+///
+/// This trait allows compile-time addition of tuple index positions.
+/// It's only implemented for index combinations that result in a valid index
+/// (i.e., the sum must be less than the maximum tuple size).
+///
+/// # Examples
+///
+/// ```rust
+/// # use typed_tuple::*;
+/// // TupleIndex2 + TupleIndex3 = TupleIndex5
+/// type Result = <TupleIndex2 as TupleIndexAdd<TupleIndex3>>::Output;
+/// assert_eq!(<Result as TupleIndex>::INDEX, 5);
+///
+/// // TupleIndex0 + TupleIndex10 = TupleIndex10
+/// type Result2 = <TupleIndex0 as TupleIndexAdd<TupleIndex10>>::Output;
+/// assert_eq!(<Result2 as TupleIndex>::INDEX, 10);
+/// ```
+pub trait TupleIndexAdd<Other> {
+    /// The resulting tuple index type after addition.
+    type Output: TupleIndex;
+}
+
+/// Trait for subtracting two tuple indices.
+///
+/// This trait allows compile-time subtraction of tuple index positions.
+/// It's only implemented for index combinations where the first index is
+/// greater than or equal to the second (i.e., no negative results).
+///
+/// # Examples
+///
+/// ```rust
+/// # use typed_tuple::*;
+/// // TupleIndex5 - TupleIndex2 = TupleIndex3
+/// type Result = <TupleIndex5 as TupleIndexSub<TupleIndex2>>::Output;
+/// assert_eq!(<Result as TupleIndex>::INDEX, 3);
+///
+/// // TupleIndex10 - TupleIndex10 = TupleIndex0
+/// type Result2 = <TupleIndex10 as TupleIndexSub<TupleIndex10>>::Output;
+/// assert_eq!(<Result2 as TupleIndex>::INDEX, 0);
+/// ```
+pub trait TupleIndexSub<Other> {
+    /// The resulting tuple index type after subtraction.
+    type Output: TupleIndex;
 }
 
 /// Trait to identify the last element index of a tuple.
@@ -104,7 +155,7 @@ pub trait LastIndex {
 }
 
 /// Trait for tuple element manipulation by type.
-pub trait TypedTuple<Idx, T>: Sized {
+pub trait TypedTuple<Idx: TupleIndex, T>: Sized + LastIndex<Last: TupleIndexSub<Idx>> {
     /// The type of the remaining tuple after popping element of type `T`.
     type PopOutput;
     /// The type of the left tuple when splitting exclusively (excludes element
@@ -114,7 +165,8 @@ pub trait TypedTuple<Idx, T>: Sized {
         + ChainRight<Self::SplitRightInclusive, Output = Self>;
     /// The type of the left tuple when splitting inclusively (includes element
     /// at INDEX): [.., INDEX].
-    type SplitLeftInclusive: TypedTuple<
+    type SplitLeftInclusive: LastIndex<Last = Idx, LastType = T>
+        + TypedTuple<
             Idx,
             T,
             SplitLeftExclusive = Self::SplitLeftExclusive,
@@ -127,7 +179,10 @@ pub trait TypedTuple<Idx, T>: Sized {
         + ChainLeft<Self::SplitLeftInclusive, Output = Self>;
     /// The type of the right tuple when splitting inclusively (includes element
     /// at INDEX): [INDEX, ..].
-    type SplitRightInclusive: TypedTuple<
+    type SplitRightInclusive: LastIndex<
+            Last = <<Self as LastIndex>::Last as TupleIndexSub<Idx>>::Output,
+            LastType = <Self as LastIndex>::LastType,
+        > + TypedTuple<
             TupleIndex0,
             T,
             SplitRightExclusive = Self::SplitRightExclusive,
@@ -468,6 +523,7 @@ pub trait TypedTupleExt<T>: Sized {
     /// ```
     fn pop_at<Idx>(self) -> (T, Self::PopOutput)
     where
+        Idx: TupleIndex,
         Self: TypedTuple<Idx, T>,
     {
         <Self as TypedTuple<Idx, T>>::pop(self)
@@ -512,6 +568,7 @@ pub trait TypedTupleExt<T>: Sized {
     /// ```
     fn split_left_at<Idx>(self) -> (Self::SplitLeftInclusive, Self::SplitRightExclusive)
     where
+        Idx: TupleIndex,
         Self: TypedTuple<Idx, T>,
     {
         <Self as TypedTuple<Idx, T>>::split_left(self)
@@ -533,6 +590,7 @@ pub trait TypedTupleExt<T>: Sized {
     /// ```
     fn split_right_at<Idx>(self) -> (Self::SplitLeftExclusive, Self::SplitRightInclusive)
     where
+        Idx: TupleIndex,
         Self: TypedTuple<Idx, T>,
     {
         <Self as TypedTuple<Idx, T>>::split_right(self)
@@ -553,6 +611,7 @@ pub trait TypedTupleExt<T>: Sized {
     /// ```
     fn split_inclusive_at<Idx>(self) -> (Self::SplitLeftInclusive, Self::SplitRightInclusive)
     where
+        Idx: TupleIndex,
         Self: TypedTuple<Idx, T>,
         T: Clone,
     {
@@ -579,4 +638,6 @@ impl<T, TT> TypedLast<T> for TT where
 
 typed_tuple_macros::generate_index_markers!();
 typed_tuple_macros::generate_last_index_impls!();
+typed_tuple_macros::generate_index_add_impls!();
+typed_tuple_macros::generate_index_sub_impls!();
 typed_tuple_macros::generate_typed_tuple_impls!();

@@ -69,6 +69,63 @@ pub fn generate_last_index_impls(_input: TokenStream) -> TokenStream {
     .into()
 }
 
+/// Generates TupleIndexAdd trait implementations for valid index combinations
+#[proc_macro]
+pub fn generate_index_add_impls(_input: TokenStream) -> TokenStream {
+    let mut impls = Vec::new();
+
+    for left in 0..MAX_SIZE {
+        for right in 0..MAX_SIZE {
+            let sum = left + right;
+            if sum >= MAX_SIZE {
+                continue;
+            }
+
+            let left_marker = quote::format_ident!("TupleIndex{}", left);
+            let right_marker = quote::format_ident!("TupleIndex{}", right);
+            let output_marker = quote::format_ident!("TupleIndex{}", sum);
+
+            impls.push(quote! {
+                impl TupleIndexAdd<#right_marker> for #left_marker {
+                    type Output = #output_marker;
+                }
+            });
+        }
+    }
+
+    quote! {
+        #(#impls)*
+    }
+    .into()
+}
+
+/// Generates TupleIndexSub trait implementations for valid index combinations
+#[proc_macro]
+pub fn generate_index_sub_impls(_input: TokenStream) -> TokenStream {
+    let mut impls = Vec::new();
+
+    for left in 0..MAX_SIZE {
+        for right in 0..=left {
+            let diff = left - right;
+
+            let left_marker = quote::format_ident!("TupleIndex{}", left);
+            let right_marker = quote::format_ident!("TupleIndex{}", right);
+            let output_marker = quote::format_ident!("TupleIndex{}", diff);
+
+            impls.push(quote! {
+                impl TupleIndexSub<#right_marker> for #left_marker {
+                    type Output = #output_marker;
+                }
+            });
+        }
+    }
+
+    quote! {
+        #(#impls)*
+    }
+    .into()
+}
+
 /// Generates ChainRight trait implementations for all tuple size combinations
 #[proc_macro]
 pub fn generate_chain_right_impls(_input: TokenStream) -> TokenStream {
