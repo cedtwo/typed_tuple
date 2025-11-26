@@ -18,7 +18,7 @@ The main purpose of this crate is to simplfy small arbitrary operations on heter
 ### Basic Operations
 
 ```rust
-use typed_tuple::TypedTuple;
+use typed_tuple::prelude::TypedTuple;
 
 let mut tuple: (i32, f64, String) = (0, 0.0, String::new());
 
@@ -40,7 +40,7 @@ assert_eq!(tuple, (84, 2.718, "hello".to_string()));
 ### Advanced Operations
 
 ```rust
-use typed_tuple::*;
+use typed_tuple::prelude::*;
 
 let tuple = (1u8, 2u16, 3u32, 4u64);
 
@@ -85,7 +85,7 @@ assert_eq!(tuple, (String::new(), 42, 3.14));
 The `LastIndex` trait provides a type-safe way to access the last element of any tuple, regardless of its size. This is particularly useful when working with generic code.
 
 ```rust
-use typed_tuple::*;
+use typed_tuple::prelude::*;
 
 // Define tuple types
 type Tuple2 = (u8, u16);
@@ -125,7 +125,7 @@ assert_eq!(rest, (1u8, 2u16, 3u32));
 The `TupleKey` trait enables defining blanket implementations that work with different tuple structures. You can use custom marker types to create semantic, type-safe APIs that work across various tuple layouts.
 
 ```rust
-use typed_tuple::{TupleKey, TypedTuple, TupleIndex0, TupleIndex1, TupleIndex2};
+use typed_tuple::prelude::{TupleKey, TypedTuple, TupleIndex0, TupleIndex1, TupleIndex2};
 
 // Define a marker type for semantic access
 struct AgeMarker;

@@ -1,6 +1,6 @@
 //! Basic tests for TypedTuple functionality.
 
-use typed_tuple::*;
+use typed_tuple::prelude::*;
 
 #[test]
 fn test_tuple_1() {

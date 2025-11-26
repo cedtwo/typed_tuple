@@ -1,6 +1,6 @@
 //! Tests for the LastIndex functionality.
 
-use typed_tuple::*;
+use typed_tuple::prelude::*;
 
 #[test]
 fn test_last_get_single_element() {

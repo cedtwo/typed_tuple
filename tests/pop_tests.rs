@@ -1,6 +1,6 @@
 //! Tests for the pop method on tuples.
 
-use typed_tuple::*;
+use typed_tuple::prelude::*;
 
 #[test]
 fn test_pop_first_element() {

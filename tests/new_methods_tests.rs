@@ -1,6 +1,6 @@
 //! Tests for new methods including replace, swap, split, and take.
 
-use typed_tuple::*;
+use typed_tuple::prelude::*;
 
 #[test]
 fn test_replace_first() {

@@ -1,7 +1,7 @@
 //! Tests for split methods (split_exclusive, split_left, split_right,
 //! split_inclusive).
 
-use typed_tuple::*;
+use typed_tuple::prelude::*;
 
 #[test]
 fn test_split_exclusive_basic() {

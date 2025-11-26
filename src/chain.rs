@@ -18,7 +18,7 @@
 /// # Examples
 ///
 /// ```rust
-/// # use typed_tuple::ChainRight;
+/// # use typed_tuple::prelude::ChainRight;
 /// // Type-level chaining
 /// type Left = (u8, u16);
 /// type Right = (u32, u64);
@@ -43,7 +43,7 @@ pub trait ChainRight<Right> {
     /// # Examples
     ///
     /// ```rust
-    /// # use typed_tuple::ChainRight;
+    /// # use typed_tuple::prelude::ChainRight;
     /// let left = (1, 2, 3);
     /// let right = (4, 5);
     /// let result = left.chain_right(right);
@@ -66,7 +66,7 @@ pub trait ChainLeft<Left> {
     /// # Examples
     ///
     /// ```rust
-    /// # use typed_tuple::ChainLeft;
+    /// # use typed_tuple::prelude::ChainLeft;
     /// let left = (1, 2, 3);
     /// let right = (4, 5);
     /// let result = right.chain_left(left);

@@ -1,6 +1,6 @@
 //! Tests for TupleIndex arithmetic operations
 
-use typed_tuple::*;
+use typed_tuple::prelude::*;
 
 #[test]
 fn test_index_add() {
