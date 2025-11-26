@@ -47,3 +47,27 @@ pub trait TupleIndexSub<Other> {
     /// The resulting tuple index type after subtraction.
     type Output: TupleIndex;
 }
+
+/// Trait for subtracting two tuple indices with saturation.
+///
+/// This trait allows compile-time subtraction of tuple index positions.
+/// Unlike `TupleIndexSub`, this trait is implemented for all index
+/// combinations. When the subtraction would result in a negative value, the
+/// result saturates at TupleIndex0.
+///
+/// # Examples
+///
+/// ```rust
+/// # use typed_tuple::prelude::*;
+/// // TupleIndex5 - TupleIndex2 = TupleIndex3
+/// type Result = <TupleIndex5 as TupleIndexSaturatingSub<TupleIndex2>>::Output;
+/// assert_eq!(<Result as TupleIndex>::INDEX, 3);
+///
+/// // TupleIndex2 - TupleIndex10 = TupleIndex0 (saturates at 0)
+/// type Result2 = <TupleIndex2 as TupleIndexSaturatingSub<TupleIndex10>>::Output;
+/// assert_eq!(<Result2 as TupleIndex>::INDEX, 0);
+/// ```
+pub trait TupleIndexSaturatingSub<Other> {
+    /// The resulting tuple index type after saturating subtraction.
+    type Output: TupleIndex;
+}

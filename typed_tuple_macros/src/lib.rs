@@ -151,6 +151,33 @@ pub fn generate_index_sub_impls(_input: TokenStream) -> TokenStream {
     .into()
 }
 
+/// Generates TupleIndexSaturatingSub trait implementations for all index combinations
+#[proc_macro]
+pub fn generate_index_saturating_sub_impls(_input: TokenStream) -> TokenStream {
+    let mut impls = Vec::new();
+
+    for left in 0..MAX_SIZE {
+        for right in 0..MAX_SIZE {
+            let diff = if left >= right { left - right } else { 0 };
+
+            let left_marker = quote::format_ident!("TupleIndex{}", left);
+            let right_marker = quote::format_ident!("TupleIndex{}", right);
+            let output_marker = quote::format_ident!("TupleIndex{}", diff);
+
+            impls.push(quote! {
+                impl TupleIndexSaturatingSub<#right_marker> for #left_marker {
+                    type Output = #output_marker;
+                }
+            });
+        }
+    }
+
+    quote! {
+        #(#impls)*
+    }
+    .into()
+}
+
 /// Generates ChainRight trait implementations for all tuple size combinations
 #[proc_macro]
 pub fn generate_chain_right_impls(_input: TokenStream) -> TokenStream {

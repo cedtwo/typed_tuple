@@ -16,7 +16,7 @@ pub mod typed_tuple_ext;
 /// Prelude module re-exporting commonly used traits and types.
 pub mod prelude {
     pub use crate::{
-        arithmetic::{TupleIndexAdd, TupleIndexSub},
+        arithmetic::{TupleIndexAdd, TupleIndexSaturatingSub, TupleIndexSub},
         chain::{ChainLeft, ChainRight},
         last_index::LastIndex,
         nth_index::NthIndex,
@@ -33,5 +33,6 @@ pub mod prelude {
     typed_tuple_macros::generate_nth_index_impls!();
     typed_tuple_macros::generate_index_add_impls!();
     typed_tuple_macros::generate_index_sub_impls!();
+    typed_tuple_macros::generate_index_saturating_sub_impls!();
     typed_tuple_macros::generate_typed_tuple_impls!();
 }
