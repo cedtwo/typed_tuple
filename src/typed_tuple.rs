@@ -26,8 +26,7 @@ pub trait TypedTuple<Idx: TupleIndex, T>: Sized + LastIndex<Last: TupleIndexSub<
         + ChainLeft<Self::SplitLeftInclusive, Output = Self>;
     /// The type of the right tuple when splitting inclusively (includes element
     /// at INDEX): [INDEX, ..].
-    type SplitRightInclusive: TypedFirst<T>
-        + TypedTuple<
+    type SplitRightInclusive: TypedTuple<
             TupleIndex0,
             T,
             SplitRightExclusive = Self::SplitRightExclusive,

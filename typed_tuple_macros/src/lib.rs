@@ -389,3 +389,72 @@ pub fn impl_typed_last_trait(_input: TokenStream) -> TokenStream {
     }
     .into()
 }
+
+/// Generates the TypedUntil trait definition with all required TypedNth bounds
+#[proc_macro]
+pub fn define_typed_until_trait(_input: TokenStream) -> TokenStream {
+    let mut bounds = Vec::new();
+    
+    // Add the basic bound
+    bounds.push(quote! { NthIndex<Idx> });
+    
+    // Add TypedNth bounds for Idx and Idx - i for all i
+    bounds.push(quote! { TypedNth<Idx> });
+    
+    for i in 1..MAX_SIZE {
+        let index_marker = quote::format_ident!("TupleIndex{}", i);
+        bounds.push(quote! { 
+            TypedNth<<Idx as TupleIndexSaturatingSub<#index_marker>>::Output> 
+        });
+    }
+    
+    // Add the TypedTuple bound
+    bounds.push(quote! {
+        TypedTuple<Idx, <Self as NthIndex<Idx>>::NthType>
+    });
+    
+    quote! {
+        /// Trait for accessing elements of a tuple up to a specific index.
+        ///
+        /// This trait is implemented for tuples that have elements accessible
+        /// up to and including index `Idx`. It provides bounds for all indices
+        /// from 0 up to `Idx` using saturating subtraction.
+        ///
+        /// This trait is automatically implemented for all tuples where the index
+        /// is valid, and it ensures that all elements from index 0 up to `Idx`
+        /// can be safely accessed.
+        pub trait TypedUntil<Idx: TupleIndex>: #(#bounds)+* {
+        }
+    }
+    .into()
+}
+
+/// Generates the TypedUntil trait implementation
+#[proc_macro]
+pub fn impl_typed_until_trait(_input: TokenStream) -> TokenStream {
+    let mut bounds = Vec::new();
+    
+    // Add the basic bound
+    bounds.push(quote! { NthIndex<Idx> });
+    
+    // Add TypedNth bounds for Idx and Idx - i for all i
+    bounds.push(quote! { TypedNth<Idx> });
+    
+    for i in 1..MAX_SIZE {
+        let index_marker = quote::format_ident!("TupleIndex{}", i);
+        bounds.push(quote! { 
+            TypedNth<<Idx as TupleIndexSaturatingSub<#index_marker>>::Output> 
+        });
+    }
+    
+    // Add the TypedTuple bound
+    bounds.push(quote! {
+        TypedTuple<Idx, <TT as NthIndex<Idx>>::NthType>
+    });
+    
+    quote! {
+        impl<Idx: TupleIndex, TT> TypedUntil<Idx> for TT where TT: #(#bounds)+* {
+        }
+    }
+    .into()
+}
