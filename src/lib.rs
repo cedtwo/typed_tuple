@@ -12,6 +12,7 @@ pub mod typed_first;
 pub mod typed_last;
 pub mod typed_tuple;
 pub mod typed_until;
+pub mod typed_until_as;
 pub mod typed_tuple_ext;
 pub mod typed_nth;
 
@@ -30,6 +31,7 @@ pub mod prelude {
         typed_tuple_ext::TypedTupleExt,
         typed_nth::TypedNth,
         typed_until::TypedUntil,
+        typed_until_as::{NthIndexedAs, NthIndexedUntil},
     };
 
     typed_tuple_macros::generate_index_markers!();

@@ -3,7 +3,9 @@
 use crate::prelude::*;
 
 /// Trait for tuple element manipulation by type.
-pub trait TypedTuple<Idx: TupleIndex, T>: Sized + LastIndex<Last: TupleIndexSub<Idx>> {
+pub trait TypedTuple<Idx: TupleIndex, T>:
+    Sized + NthIndex<Idx> + LastIndex<Last: TupleIndexSub<Idx>> + NthIndexedUntil<Idx>
+{
     /// The type of the remaining tuple after popping element of type `T`.
     type PopOutput;
     /// The type of the left tuple when splitting exclusively (excludes element
@@ -13,7 +15,10 @@ pub trait TypedTuple<Idx: TupleIndex, T>: Sized + LastIndex<Last: TupleIndexSub<
         + ChainRight<Self::SplitRightInclusive, Output = Self>;
     /// The type of the left tuple when splitting inclusively (includes element
     /// at INDEX): [.., INDEX].
-    type SplitLeftInclusive: TypedTuple<
+    type SplitLeftInclusive: NthIndexedAs<Idx, Self>
+        + TypedUntil<Idx>
+        + NthIndexedUntil<Idx>
+        + TypedTuple<
             Idx,
             T,
             SplitLeftExclusive = Self::SplitLeftExclusive,

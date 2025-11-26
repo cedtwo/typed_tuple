@@ -458,3 +458,121 @@ pub fn impl_typed_until_trait(_input: TokenStream) -> TokenStream {
     }
     .into()
 }
+
+/// Generates the NthIndexedUntil trait definition
+#[proc_macro]
+pub fn define_nth_indexed_until_trait(_input: TokenStream) -> TokenStream {
+    let mut bounds = Vec::new();
+    
+    // Add NthIndex bounds for Idx and all saturating subtractions
+    bounds.push(quote! { NthIndex<Idx> });
+    
+    for i in 1..MAX_SIZE {
+        let index_marker = quote::format_ident!("TupleIndex{}", i);
+        bounds.push(quote! { 
+            NthIndex<<Idx as TupleIndexSaturatingSub<#index_marker>>::Output>
+        });
+    }
+    
+    quote! {
+        /// Trait for tuples that implement `NthIndex` up to a specific index.
+        ///
+        /// This trait ensures that a tuple has `NthIndex` implementations for
+        /// index `Idx` and all indices reachable by saturating subtraction from `Idx`.
+        pub trait NthIndexedUntil<Idx: TupleIndex>: #(#bounds)+* {
+        }
+    }
+    .into()
+}
+
+/// Generates the NthIndexedUntil trait implementation
+#[proc_macro]
+pub fn impl_nth_indexed_until_trait(_input: TokenStream) -> TokenStream {
+    let mut bounds = Vec::new();
+    
+    // Add NthIndex bounds for Idx and all saturating subtractions
+    bounds.push(quote! { NthIndex<Idx> });
+    
+    for i in 1..MAX_SIZE {
+        let index_marker = quote::format_ident!("TupleIndex{}", i);
+        bounds.push(quote! { 
+            NthIndex<<Idx as TupleIndexSaturatingSub<#index_marker>>::Output>
+        });
+    }
+    
+    quote! {
+        impl<Idx: TupleIndex, TT> NthIndexedUntil<Idx> for TT 
+        where 
+            TT: #(#bounds)+* 
+        {
+        }
+    }
+    .into()
+}
+
+/// Generates the NthIndexedAs trait definition
+#[proc_macro]
+pub fn define_nth_indexed_as_trait(_input: TokenStream) -> TokenStream {
+    let mut bounds = Vec::new();
+    
+    // Add the basic bound
+    bounds.push(quote! { NthIndexedUntil<Idx> });
+    
+    // Add type equality bounds for Idx and all saturating subtractions
+    bounds.push(quote! { 
+        NthIndex<Idx, NthType = <TT as NthIndex<Idx>>::NthType>
+    });
+    
+    for i in 1..MAX_SIZE {
+        let index_marker = quote::format_ident!("TupleIndex{}", i);
+        bounds.push(quote! { 
+            NthIndex<
+                <Idx as TupleIndexSaturatingSub<#index_marker>>::Output,
+                NthType = <TT as NthIndex<<Idx as TupleIndexSaturatingSub<#index_marker>>::Output>>::NthType
+            >
+        });
+    }
+    
+    quote! {
+        /// Trait for tuples with matching element types up to a specific index.
+        ///
+        /// This trait is implemented for tuples where all element types from index 0
+        /// up to and including index `Idx` match the corresponding types in tuple `TT`.
+        pub trait NthIndexedAs<Idx: TupleIndex, TT: NthIndexedUntil<Idx>>: #(#bounds)+* {
+        }
+    }
+    .into()
+}
+
+/// Generates the NthIndexedAs trait implementation
+#[proc_macro]
+pub fn impl_nth_indexed_as_trait(_input: TokenStream) -> TokenStream {
+    let mut bounds = Vec::new();
+    
+    // Add the basic bound
+    bounds.push(quote! { NthIndexedUntil<Idx> });
+    
+    // Add type equality bounds for Idx and all saturating subtractions
+    bounds.push(quote! { 
+        NthIndex<Idx, NthType = <Other as NthIndex<Idx>>::NthType>
+    });
+    
+    for i in 1..MAX_SIZE {
+        let index_marker = quote::format_ident!("TupleIndex{}", i);
+        bounds.push(quote! { 
+            NthIndex<
+                <Idx as TupleIndexSaturatingSub<#index_marker>>::Output,
+                NthType = <Other as NthIndex<<Idx as TupleIndexSaturatingSub<#index_marker>>::Output>>::NthType
+            >
+        });
+    }
+    
+    quote! {
+        impl<Idx: TupleIndex, Other: NthIndexedUntil<Idx>, TT> NthIndexedAs<Idx, Other> for TT 
+        where 
+            TT: #(#bounds)+* 
+        {
+        }
+    }
+    .into()
+}
