@@ -10,11 +10,11 @@ pub mod tuple_index;
 pub mod tuple_key;
 pub mod typed_first;
 pub mod typed_last;
+pub mod typed_nth;
 pub mod typed_tuple;
+pub mod typed_tuple_ext;
 pub mod typed_until;
 pub mod typed_until_as;
-pub mod typed_tuple_ext;
-pub mod typed_nth;
 
 /// Prelude module re-exporting commonly used traits and types.
 pub mod prelude {
@@ -27,9 +27,9 @@ pub mod prelude {
         tuple_key::TupleKey,
         typed_first::TypedFirst,
         typed_last::TypedLast,
+        typed_nth::TypedNth,
         typed_tuple::TypedTuple,
         typed_tuple_ext::TypedTupleExt,
-        typed_nth::TypedNth,
         typed_until::TypedUntil,
         typed_until_as::{NthIndexedAs, NthIndexedUntil},
     };
