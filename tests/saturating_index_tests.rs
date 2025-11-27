@@ -59,11 +59,17 @@ fn test_saturating_vs_regular_sub() {
     // When no saturation occurs, both should give the same result
     type Regular = <TupleIndex10 as TupleIndexSub<TupleIndex4>>::Output;
     type Saturating = <TupleIndex10 as TupleIndexSaturatingSub<TupleIndex4>>::Output;
-    assert_eq!(<Regular as TupleIndex>::INDEX, <Saturating as TupleIndex>::INDEX);
+    assert_eq!(
+        <Regular as TupleIndex>::INDEX,
+        <Saturating as TupleIndex>::INDEX
+    );
 
     type Regular2 = <TupleIndex20 as TupleIndexSub<TupleIndex15>>::Output;
     type Saturating2 = <TupleIndex20 as TupleIndexSaturatingSub<TupleIndex15>>::Output;
-    assert_eq!(<Regular2 as TupleIndex>::INDEX, <Saturating2 as TupleIndex>::INDEX);
+    assert_eq!(
+        <Regular2 as TupleIndex>::INDEX,
+        <Saturating2 as TupleIndex>::INDEX
+    );
 }
 
 #[test]

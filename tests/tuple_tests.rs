@@ -136,7 +136,10 @@ fn test_tuple_8() {
     tuple.replace(60i16);
     tuple.replace(70i32);
     tuple.replace(80i64);
-    assert_eq!(tuple, (10u8, 20u16, 30u32, 40u64, 50i8, 60i16, 70i32, 80i64));
+    assert_eq!(
+        tuple,
+        (10u8, 20u16, 30u32, 40u64, 50i8, 60i16, 70i32, 80i64)
+    );
 }
 
 #[test]
@@ -163,7 +166,12 @@ fn test_tuple_10() {
     tuple.apply(|x: &mut i64| *x += 1);
     tuple.apply(|x: &mut f32| *x += 1.0);
     tuple.apply(|x: &mut f64| *x += 1.0);
-    assert_eq!(tuple, (2u8, 3u16, 4u32, 5u64, 6i8, 7i16, 8i32, 9i64, 10.0f32, 11.0f64));
+    assert_eq!(
+        tuple,
+        (
+            2u8, 3u16, 4u32, 5u64, 6i8, 7i16, 8i32, 9i64, 10.0f32, 11.0f64
+        )
+    );
 }
 
 // Additional edge case tests

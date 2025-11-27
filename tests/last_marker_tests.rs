@@ -111,11 +111,17 @@ fn test_last_take() {
     type TupleType = (String, String, String);
     type LastIdx = <TupleType as LastIndex>::Last;
 
-    let mut tuple: TupleType =
-        (String::from("first"), String::from("second"), String::from("last"));
+    let mut tuple: TupleType = (
+        String::from("first"),
+        String::from("second"),
+        String::from("last"),
+    );
     let last: String = TypedTuple::<LastIdx, String>::take(&mut tuple);
     assert_eq!(last, "last");
-    assert_eq!(tuple, (String::from("first"), String::from("second"), String::new()));
+    assert_eq!(
+        tuple,
+        (String::from("first"), String::from("second"), String::new())
+    );
 }
 
 #[test]
