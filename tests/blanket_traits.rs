@@ -1,7 +1,7 @@
 //! Tests for blanket trait implementations using TypedTuple.
-
-use typed_tuple::prelude::{IndexedTuple, TupleIndex, TupleIndex0, TupleIndex1, TupleIndex2};
-use typed_tuple::typed_tuple_ext::TypedTuple;
+use typed_tuple::prelude::{
+    IndexedTuple, TupleIndex, TupleIndex0, TupleIndex1, TupleIndex2, TypedTuple,
+};
 
 // Test custom trait with blanket implementation using IndexedTuple
 // This trait does NOT have a generic const parameter

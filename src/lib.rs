@@ -4,6 +4,7 @@
 
 pub mod arithmetic;
 pub mod chain;
+pub mod indexed_tuple;
 pub mod last_index;
 pub mod nth_index;
 pub mod tuple_index;
@@ -12,7 +13,6 @@ pub mod typed_first;
 pub mod typed_last;
 pub mod typed_nth;
 pub mod typed_tuple;
-pub mod typed_tuple_ext;
 pub mod typed_until;
 pub mod typed_until_as;
 
@@ -21,6 +21,7 @@ pub mod prelude {
     pub use crate::{
         arithmetic::{TupleIndexAdd, TupleIndexSaturatingSub, TupleIndexSub},
         chain::{ChainLeft, ChainRight},
+        indexed_tuple::IndexedTuple,
         last_index::LastIndex,
         nth_index::NthIndex,
         tuple_index::TupleIndex,
@@ -28,8 +29,7 @@ pub mod prelude {
         typed_first::TypedFirst,
         typed_last::TypedLast,
         typed_nth::TypedNth,
-        typed_tuple::IndexedTuple,
-        typed_tuple_ext::TypedTuple,
+        typed_tuple::TypedTuple,
         typed_until::TypedUntil,
         typed_until_as::{NthIndexedAs, NthIndexedUntil},
     };
