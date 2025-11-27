@@ -8,7 +8,7 @@ fn test_last_get_single_element() {
     type LastIdx = <TupleType as LastIndex>::Last;
 
     let tuple: TupleType = (42,);
-    let last: &u32 = TypedTuple::<LastIdx, u32>::get(&tuple);
+    let last: &u32 = IndexedTuple::<LastIdx, u32>::get(&tuple);
     assert_eq!(*last, 42u32);
 }
 
@@ -18,7 +18,7 @@ fn test_last_get_two_elements() {
     type LastIdx = <TupleType as LastIndex>::Last;
 
     let tuple: TupleType = (1, 2);
-    let last: &u16 = TypedTuple::<LastIdx, u16>::get(&tuple);
+    let last: &u16 = IndexedTuple::<LastIdx, u16>::get(&tuple);
     assert_eq!(*last, 2u16);
 }
 
@@ -28,7 +28,7 @@ fn test_last_get_five_elements() {
     type LastIdx = <TupleType as LastIndex>::Last;
 
     let tuple: TupleType = (1, 2, 3, 4, 5);
-    let last: &i8 = TypedTuple::<LastIdx, i8>::get(&tuple);
+    let last: &i8 = IndexedTuple::<LastIdx, i8>::get(&tuple);
     assert_eq!(*last, 5i8);
 }
 
@@ -38,7 +38,7 @@ fn test_last_get_mut() {
     type LastIdx = <TupleType as LastIndex>::Last;
 
     let mut tuple: TupleType = (1, 2, 3);
-    let last: &mut u32 = TypedTuple::<LastIdx, u32>::get_mut(&mut tuple);
+    let last: &mut u32 = IndexedTuple::<LastIdx, u32>::get_mut(&mut tuple);
     *last = 100u32;
     assert_eq!(tuple, (1u8, 2u16, 100u32));
 }
@@ -130,7 +130,7 @@ fn test_last_split_exclusive() {
     type LastIdx = <TupleType as LastIndex>::Last;
 
     let tuple: TupleType = (1, 2, 3, 4);
-    let (left, element, right) = TypedTuple::<LastIdx, u64>::split_exclusive(tuple);
+    let (left, element, right) = IndexedTuple::<LastIdx, u64>::split_exclusive(tuple);
     assert_eq!(left, (1u8, 2u16, 3u32));
     assert_eq!(element, 4u64);
     assert_eq!(right, ());
@@ -173,11 +173,26 @@ fn test_last_with_different_tuple_sizes() {
     let tuple4: T4 = (1, 2, 3, 400);
     let tuple5: T5 = (1, 2, 3, 4, 500);
 
-    assert_eq!(*TypedTuple::<<T1 as LastIndex>::Last, _>::get(&tuple1), 100);
-    assert_eq!(*TypedTuple::<<T2 as LastIndex>::Last, _>::get(&tuple2), 200);
-    assert_eq!(*TypedTuple::<<T3 as LastIndex>::Last, _>::get(&tuple3), 300);
-    assert_eq!(*TypedTuple::<<T4 as LastIndex>::Last, _>::get(&tuple4), 400);
-    assert_eq!(*TypedTuple::<<T5 as LastIndex>::Last, _>::get(&tuple5), 500);
+    assert_eq!(
+        *IndexedTuple::<<T1 as LastIndex>::Last, _>::get(&tuple1),
+        100
+    );
+    assert_eq!(
+        *IndexedTuple::<<T2 as LastIndex>::Last, _>::get(&tuple2),
+        200
+    );
+    assert_eq!(
+        *IndexedTuple::<<T3 as LastIndex>::Last, _>::get(&tuple3),
+        300
+    );
+    assert_eq!(
+        *IndexedTuple::<<T4 as LastIndex>::Last, _>::get(&tuple4),
+        400
+    );
+    assert_eq!(
+        *IndexedTuple::<<T5 as LastIndex>::Last, _>::get(&tuple5),
+        500
+    );
 }
 
 #[test]
@@ -186,14 +201,14 @@ fn test_last_with_mixed_types() {
     type LastIdx1 = <TupleType1 as LastIndex>::Last;
 
     let tuple: TupleType1 = (42, "hello", 3.14, true, 'x');
-    let last: &char = TypedTuple::<LastIdx1, char>::get(&tuple);
+    let last: &char = IndexedTuple::<LastIdx1, char>::get(&tuple);
     assert_eq!(*last, 'x');
 
     type TupleType2 = (u8, Vec<i32>);
     type LastIdx2 = <TupleType2 as LastIndex>::Last;
 
     let tuple2: TupleType2 = (1, vec![1, 2, 3]);
-    let last_vec: &Vec<i32> = TypedTuple::<LastIdx2, Vec<i32>>::get(&tuple2);
+    let last_vec: &Vec<i32> = IndexedTuple::<LastIdx2, Vec<i32>>::get(&tuple2);
     assert_eq!(last_vec, &vec![1, 2, 3]);
 }
 
@@ -205,7 +220,7 @@ fn test_last_index_trait() {
 
     // The Last associated type should be TupleIndex2 for a 3-element tuple
     let tuple: TupleType = (1, 2, 3);
-    let last: &u32 = TypedTuple::<LastMarker, u32>::get(&tuple);
+    let last: &u32 = IndexedTuple::<LastMarker, u32>::get(&tuple);
     assert_eq!(*last, 3u32);
 }
 

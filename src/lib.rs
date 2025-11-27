@@ -28,8 +28,8 @@ pub mod prelude {
         typed_first::TypedFirst,
         typed_last::TypedLast,
         typed_nth::TypedNth,
-        typed_tuple::TypedTuple,
-        typed_tuple_ext::TypedTupleExt,
+        typed_tuple::IndexedTuple,
+        typed_tuple_ext::TypedTuple,
         typed_until::TypedUntil,
         typed_until_as::{NthIndexedAs, NthIndexedUntil},
     };

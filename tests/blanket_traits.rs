@@ -1,9 +1,9 @@
 //! Tests for blanket trait implementations using TypedTuple.
 
-use typed_tuple::prelude::{TupleIndex, TupleIndex0, TupleIndex1, TupleIndex2, TypedTuple};
-use typed_tuple::typed_tuple_ext::TypedTupleExt;
+use typed_tuple::prelude::{IndexedTuple, TupleIndex, TupleIndex0, TupleIndex1, TupleIndex2};
+use typed_tuple::typed_tuple_ext::TypedTuple;
 
-// Test custom trait with blanket implementation using TypedTuple
+// Test custom trait with blanket implementation using IndexedTuple
 // This trait does NOT have a generic const parameter
 trait Incrementable {
     fn increment(&mut self);
@@ -12,7 +12,7 @@ trait Incrementable {
 // Blanket implementation for any tuple that contains u32 at index 0
 impl<T> Incrementable for T
 where
-    T: TypedTuple<TupleIndex0, u32>,
+    T: IndexedTuple<TupleIndex0, u32>,
 {
     fn increment(&mut self) {
         let current: &u32 = self.get();
@@ -54,7 +54,7 @@ trait ElementAt<Idx, T> {
 impl<Idx, M, T> ElementAt<Idx, T> for M
 where
     Idx: TupleIndex,
-    M: TypedTuple<Idx, T>,
+    M: IndexedTuple<Idx, T>,
 {
     fn get_at(&self) -> &T {
         self.get()

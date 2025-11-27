@@ -3,7 +3,7 @@
 use crate::prelude::*;
 
 /// Extension trait to add additional methods to TypedTuple.
-pub trait TypedTupleExt<T>: Sized {
+pub trait TypedTuple<T>: Sized {
     /// Replaces the element of type `T` with the provided value, returning the
     /// old value.
     ///
@@ -18,7 +18,7 @@ pub trait TypedTupleExt<T>: Sized {
     /// # Example
     ///
     /// ```rust
-    /// # use typed_tuple::prelude::TypedTuple;
+    /// # use typed_tuple::prelude::IndexedTuple;
     /// let mut tuple = (10u32, 20u64);
     /// let old = tuple.replace(30u32);
     /// assert_eq!(old, 10u32);
@@ -27,7 +27,7 @@ pub trait TypedTupleExt<T>: Sized {
     #[inline]
     fn replace<INDEX: TupleIndex>(&mut self, value: T) -> T
     where
-        Self: TypedTuple<INDEX, T>,
+        Self: IndexedTuple<INDEX, T>,
         INDEX: TupleIndex,
     {
         core::mem::replace(self.get_mut(), value)
@@ -45,14 +45,14 @@ pub trait TypedTupleExt<T>: Sized {
     /// assert_eq!(tuple, ("A".to_string(), 2, 4));
     ///
     /// // Apply by 'const' index.
-    /// TypedTuple::<TupleIndex0, _>::apply(&mut tuple, |el| *el = el.to_lowercase());
-    /// TypedTuple::<TupleIndex1, _>::apply(&mut tuple, |el| *el -= 1);
-    /// TypedTuple::<TupleIndex2, _>::apply(&mut tuple, |el| *el -= 2);
+    /// IndexedTuple::<TupleIndex0, _>::apply(&mut tuple, |el| *el = el.to_lowercase());
+    /// IndexedTuple::<TupleIndex1, _>::apply(&mut tuple, |el| *el -= 1);
+    /// IndexedTuple::<TupleIndex2, _>::apply(&mut tuple, |el| *el -= 2);
     /// assert_eq!(tuple, ("a".to_string(), 1, 2))
     /// ```
     fn apply<INDEX: TupleIndex, FN: FnOnce(&mut T)>(&mut self, f: FN)
     where
-        Self: TypedTuple<INDEX, T>,
+        Self: IndexedTuple<INDEX, T>,
         INDEX: TupleIndex,
     {
         f(self.get_mut());
@@ -75,7 +75,7 @@ pub trait TypedTupleExt<T>: Sized {
     /// ```
     fn map<INDEX: TupleIndex, FN, R>(&self, f: FN) -> R
     where
-        Self: TypedTuple<INDEX, T>,
+        Self: IndexedTuple<INDEX, T>,
         INDEX: TupleIndex,
         FN: FnOnce(&T) -> R,
     {
@@ -107,7 +107,7 @@ pub trait TypedTupleExt<T>: Sized {
     /// ```
     fn map_mut<INDEX: TupleIndex, FN, R>(&mut self, f: FN) -> R
     where
-        Self: TypedTuple<INDEX, T>,
+        Self: IndexedTuple<INDEX, T>,
         INDEX: TupleIndex,
         FN: FnOnce(&mut T) -> R,
     {
@@ -134,13 +134,13 @@ pub trait TypedTupleExt<T>: Sized {
     ///
     /// // Pop by 'const' index.
     /// let tuple = ("a", 'b', 2usize);
-    /// let (c, rest) = TypedTuple::<TupleIndex1, _>::pop(tuple);
+    /// let (c, rest) = IndexedTuple::<TupleIndex1, _>::pop(tuple);
     /// assert_eq!(c, 'b');
     /// assert_eq!(rest, ("a", 2usize));
     /// ```
     fn pop<INDEX: TupleIndex>(self) -> (T, Self::PopOutput)
     where
-        Self: TypedTuple<INDEX, T>,
+        Self: IndexedTuple<INDEX, T>,
         INDEX: TupleIndex,
     {
         let (left, element, right) = self.split_exclusive();
@@ -158,20 +158,20 @@ pub trait TypedTupleExt<T>: Sized {
     /// ```rust
     /// # use typed_tuple::prelude::*;
     /// let mut tuple = (1u32, "hello", 2u32, 'x', 3u32);
-    /// TypedTuple::<TupleIndex0, u32>::swap::<TupleIndex2>(&mut tuple);
+    /// IndexedTuple::<TupleIndex0, u32>::swap::<TupleIndex2>(&mut tuple);
     /// assert_eq!(tuple, (2u32, "hello", 1u32, 'x', 3u32));
     /// ```
     fn swap<INDEX, OTHER>(&mut self)
     where
-        Self: TypedTuple<INDEX, T> + TypedTuple<OTHER, T>,
+        Self: IndexedTuple<INDEX, T> + IndexedTuple<OTHER, T>,
         INDEX: TupleIndex,
         OTHER: TupleIndex,
     {
         if INDEX::INDEX != OTHER::INDEX {
             unsafe {
                 let ptr = self as *mut Self;
-                let field1 = <Self as TypedTuple<INDEX, T>>::get_mut(&mut *ptr);
-                let field2 = <Self as TypedTuple<OTHER, T>>::get_mut(&mut *ptr);
+                let field1 = <Self as IndexedTuple<INDEX, T>>::get_mut(&mut *ptr);
+                let field2 = <Self as IndexedTuple<OTHER, T>>::get_mut(&mut *ptr);
                 core::mem::swap(field1, field2);
             }
         }
@@ -186,7 +186,7 @@ pub trait TypedTupleExt<T>: Sized {
     /// # Example
     ///
     /// ```rust
-    /// # use typed_tuple::prelude::TypedTuple;
+    /// # use typed_tuple::prelude::IndexedTuple;
     /// let mut tuple = (String::from("hello"), 42, 3.14);
     /// let s: String = tuple.take();
     /// assert_eq!(s, "hello");
@@ -195,7 +195,7 @@ pub trait TypedTupleExt<T>: Sized {
     #[inline]
     fn take<INDEX>(&mut self) -> T
     where
-        Self: TypedTuple<INDEX, T>,
+        Self: IndexedTuple<INDEX, T>,
         INDEX: TupleIndex,
         T: Default,
     {
@@ -218,13 +218,13 @@ pub trait TypedTupleExt<T>: Sized {
     /// ```rust
     /// # use typed_tuple::prelude::*;
     /// let tuple = (1u8, 2u16, 3u32, 4u64, 5i8);
-    /// let (left, right) = TypedTuple::<TupleIndex2, u32>::split_left(tuple);
+    /// let (left, right) = IndexedTuple::<TupleIndex2, u32>::split_left(tuple);
     /// assert_eq!(left, (1u8, 2u16, 3u32));
     /// assert_eq!(right, (4u64, 5i8));
     /// ```
     fn split_left<INDEX>(self) -> (Self::SplitLeftInclusive, Self::SplitRightExclusive)
     where
-        Self: TypedTuple<INDEX, T>,
+        Self: IndexedTuple<INDEX, T>,
         INDEX: TupleIndex,
     {
         let (left_exclusive, element, right_exclusive) = self.split_exclusive();
@@ -247,13 +247,13 @@ pub trait TypedTupleExt<T>: Sized {
     /// ```rust
     /// # use typed_tuple::prelude::*;
     /// let tuple = (1u8, 2u16, 3u32, 4u64, 5i8);
-    /// let (left, right) = TypedTuple::<TupleIndex2, u32>::split_right(tuple);
+    /// let (left, right) = IndexedTuple::<TupleIndex2, u32>::split_right(tuple);
     /// assert_eq!(left, (1u8, 2u16));
     /// assert_eq!(right, (3u32, 4u64, 5i8));
     /// ```
     fn split_right<INDEX>(self) -> (Self::SplitLeftExclusive, Self::SplitRightInclusive)
     where
-        Self: TypedTuple<INDEX, T>,
+        Self: IndexedTuple<INDEX, T>,
         INDEX: TupleIndex,
     {
         let (left_exclusive, element, right_exclusive) = self.split_exclusive();
@@ -276,13 +276,13 @@ pub trait TypedTupleExt<T>: Sized {
     /// ```rust
     /// # use typed_tuple::prelude::*;
     /// let tuple = (1u8, 2u16, 3u32, 4u64, 5i8);
-    /// let (left, right) = TypedTuple::<TupleIndex2, u32>::split_inclusive(tuple);
+    /// let (left, right) = IndexedTuple::<TupleIndex2, u32>::split_inclusive(tuple);
     /// assert_eq!(left, (1u8, 2u16, 3u32));
     /// assert_eq!(right, (3u32, 4u64, 5i8));
     /// ```
     fn split_inclusive<INDEX>(self) -> (Self::SplitLeftInclusive, Self::SplitRightInclusive)
     where
-        Self: TypedTuple<INDEX, T>,
+        Self: IndexedTuple<INDEX, T>,
         INDEX: TupleIndex,
         T: Clone,
     {
@@ -306,11 +306,11 @@ pub trait TypedTupleExt<T>: Sized {
     /// assert_eq!(val, 3u32);
     /// assert_eq!(rest, (1u8, 2u16));
     /// ```
-    #[deprecated = "Replaced by `TypedTuple::pop`"]
+    #[deprecated = "Replaced by `IndexedTuple::pop`"]
     fn pop_at<INDEX>(self) -> (T, Self::PopOutput)
     where
         INDEX: TupleIndex,
-        Self: TypedTuple<INDEX, T>,
+        Self: IndexedTuple<INDEX, T>,
     {
         self.pop::<INDEX>()
     }
@@ -329,10 +329,10 @@ pub trait TypedTupleExt<T>: Sized {
     /// tuple.swap_at::<TupleIndex0, TupleIndex2>();
     /// assert_eq!(tuple, (2u32, "hello", 1u32, 'x', 3u32));
     /// ```
-    #[deprecated = "Replaced by `TypedTuple::swap`"]
+    #[deprecated = "Replaced by `IndexedTuple::swap`"]
     fn swap_at<INDEX, OTHER>(&mut self)
     where
-        Self: TypedTuple<INDEX, T> + TypedTuple<OTHER, T>,
+        Self: IndexedTuple<INDEX, T> + IndexedTuple<OTHER, T>,
         INDEX: TupleIndex,
         OTHER: TupleIndex,
     {
@@ -353,11 +353,11 @@ pub trait TypedTupleExt<T>: Sized {
     /// assert_eq!(left, (1u8, 2u16, 3u32));
     /// assert_eq!(right, (4u64, 5i8));
     /// ```
-    #[deprecated = "Replaced by `TypedTuple::split_left`"]
+    #[deprecated = "Replaced by `IndexedTuple::split_left`"]
     fn split_left_at<INDEX>(self) -> (Self::SplitLeftInclusive, Self::SplitRightExclusive)
     where
         INDEX: TupleIndex,
-        Self: TypedTuple<INDEX, T>,
+        Self: IndexedTuple<INDEX, T>,
     {
         self.split_left::<INDEX>()
     }
@@ -376,11 +376,11 @@ pub trait TypedTupleExt<T>: Sized {
     /// assert_eq!(left, (1u8, 2u16));
     /// assert_eq!(right, (3u32, 4u64, 5i8));
     /// ```
-    #[deprecated = "Replaced by `TypedTuple::split_right`"]
+    #[deprecated = "Replaced by `IndexedTuple::split_right`"]
     fn split_right_at<INDEX>(self) -> (Self::SplitLeftExclusive, Self::SplitRightInclusive)
     where
         INDEX: TupleIndex,
-        Self: TypedTuple<INDEX, T>,
+        Self: IndexedTuple<INDEX, T>,
     {
         self.split_right::<INDEX>()
     }
@@ -398,15 +398,15 @@ pub trait TypedTupleExt<T>: Sized {
     /// assert_eq!(left, (1u8, 2u16, 3u32));
     /// assert_eq!(right, (3u32, 4u64, 5i8));
     /// ```
-    #[deprecated = "Replaced by `TypedTuple::split_inclusive`"]
+    #[deprecated = "Replaced by `IndexedTuple::split_inclusive`"]
     fn split_inclusive_at<INDEX>(self) -> (Self::SplitLeftInclusive, Self::SplitRightInclusive)
     where
         INDEX: TupleIndex,
-        Self: TypedTuple<INDEX, T>,
+        Self: IndexedTuple<INDEX, T>,
         T: Clone,
     {
         self.split_inclusive::<INDEX>()
     }
 }
 
-impl<T, TT> TypedTupleExt<T> for TT {}
+impl<T, TT> TypedTuple<T> for TT {}

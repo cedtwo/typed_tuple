@@ -219,7 +219,7 @@ pub fn generate_chain_right_impls(_input: TokenStream) -> TokenStream {
     .into()
 }
 
-/// Generates TypedTuple trait implementations for all tuple sizes and indices
+/// Generates IndexedTuple trait implementations for all tuple sizes and indices
 #[proc_macro]
 pub fn generate_typed_tuple_impls(_input: TokenStream) -> TokenStream {
     let mut impls = Vec::new();
@@ -240,7 +240,7 @@ pub fn generate_typed_tuple_impls(_input: TokenStream) -> TokenStream {
             let split_right_exclusive_indices = ((index + 1)..size).map(syn::Index::from);
 
             impls.push(quote! {
-                impl<#(#type_params),*> TypedTuple<#index_marker, #target_type> for (#(#type_params,)*) {
+                impl<#(#type_params),*> IndexedTuple<#index_marker, #target_type> for (#(#type_params,)*) {
                     type PopOutput = <Self::SplitLeftExclusive as ChainRight<Self::SplitRightExclusive>>::Output;
                     type SplitLeftExclusive = (#(#split_left_exclusive_types,)*);
                     type SplitLeftInclusive = <Self::SplitLeftExclusive as ChainRight<(#target_type,)>>::Output;
@@ -316,9 +316,9 @@ pub fn define_typed_last_trait(_input: TokenStream) -> TokenStream {
         });
     }
 
-    // Add the final TypedTuple bound
+    // Add the final IndexedTuple bound
     bounds.push(quote! {
-        TypedTuple<
+        IndexedTuple<
             <Self as LastIndex>::Last,
             T,
             SplitRightInclusive = (T,),
@@ -331,7 +331,7 @@ pub fn define_typed_last_trait(_input: TokenStream) -> TokenStream {
         /// Trait for accessing the last element of a tuple by type.
         ///
         /// This trait is implemented for tuples where the last element is of type `T`.
-        /// It combines the functionality of `LastIndex` and `TypedTuple` to provide
+        /// It combines the functionality of `LastIndex` and `IndexedTuple` to provide
         /// type-safe access to the last element.
         ///
         /// # Examples
@@ -372,9 +372,9 @@ pub fn impl_typed_last_trait(_input: TokenStream) -> TokenStream {
         });
     }
 
-    // Add the final TypedTuple bound
+    // Add the final IndexedTuple bound
     bounds.push(quote! {
-        TypedTuple<
+        IndexedTuple<
             <TT as LastIndex>::Last,
             T,
             SplitRightInclusive = (T,),
@@ -408,9 +408,9 @@ pub fn define_typed_until_trait(_input: TokenStream) -> TokenStream {
         });
     }
     
-    // Add the TypedTuple bound
+    // Add the IndexedTuple bound
     bounds.push(quote! {
-        TypedTuple<Idx, <Self as NthIndex<Idx>>::NthType>
+        IndexedTuple<Idx, <Self as NthIndex<Idx>>::NthType>
     });
     
     quote! {
@@ -447,9 +447,9 @@ pub fn impl_typed_until_trait(_input: TokenStream) -> TokenStream {
         });
     }
     
-    // Add the TypedTuple bound
+    // Add the IndexedTuple bound
     bounds.push(quote! {
-        TypedTuple<Idx, <TT as NthIndex<Idx>>::NthType>
+        IndexedTuple<Idx, <TT as NthIndex<Idx>>::NthType>
     });
     
     quote! {

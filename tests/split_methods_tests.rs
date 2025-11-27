@@ -6,7 +6,7 @@ use typed_tuple::prelude::*;
 #[test]
 fn test_split_exclusive_basic() {
     let tuple = (1u8, 2u16, 3u32, 4u64, 5i8);
-    let (left, element, right) = TypedTuple::<TupleIndex2, u32>::split_exclusive(tuple);
+    let (left, element, right) = IndexedTuple::<TupleIndex2, u32>::split_exclusive(tuple);
     assert_eq!(left, (1u8, 2u16));
     assert_eq!(element, 3u32);
     assert_eq!(right, (4u64, 5i8));
@@ -15,7 +15,7 @@ fn test_split_exclusive_basic() {
 #[test]
 fn test_split_exclusive_first() {
     let tuple = (1u8, 2u16, 3u32);
-    let (left, element, right) = TypedTuple::<TupleIndex0, u8>::split_exclusive(tuple);
+    let (left, element, right) = IndexedTuple::<TupleIndex0, u8>::split_exclusive(tuple);
     assert_eq!(left, ());
     assert_eq!(element, 1u8);
     assert_eq!(right, (2u16, 3u32));
@@ -24,7 +24,7 @@ fn test_split_exclusive_first() {
 #[test]
 fn test_split_exclusive_last() {
     let tuple = (1u8, 2u16, 3u32);
-    let (left, element, right) = TypedTuple::<TupleIndex2, u32>::split_exclusive(tuple);
+    let (left, element, right) = IndexedTuple::<TupleIndex2, u32>::split_exclusive(tuple);
     assert_eq!(left, (1u8, 2u16));
     assert_eq!(element, 3u32);
     assert_eq!(right, ());
@@ -82,7 +82,7 @@ fn test_split_right_last() {
 fn test_all_split_methods_together() {
     // Test that all four methods work correctly on the same tuple structure
     let tuple1 = (1u8, 2u16, 3u32, 4u64, 5i8);
-    let (left_ex, elem, right_ex) = TypedTuple::<TupleIndex2, u32>::split_exclusive(tuple1);
+    let (left_ex, elem, right_ex) = IndexedTuple::<TupleIndex2, u32>::split_exclusive(tuple1);
     assert_eq!(left_ex, (1u8, 2u16));
     assert_eq!(elem, 3u32);
     assert_eq!(right_ex, (4u64, 5i8));
@@ -102,7 +102,7 @@ fn test_all_split_methods_together() {
 fn test_split_single_element() {
     let tuple = (42u32,);
 
-    let (left, elem, right) = TypedTuple::<TupleIndex0, u32>::split_exclusive(tuple);
+    let (left, elem, right) = IndexedTuple::<TupleIndex0, u32>::split_exclusive(tuple);
     assert_eq!(left, ());
     assert_eq!(elem, 42u32);
     assert_eq!(right, ());
