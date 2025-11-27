@@ -33,7 +33,7 @@ fn test_split_exclusive_last() {
 #[test]
 fn test_split_left_basic() {
     let tuple = (1u8, 2u16, 3u32, 4u64, 5i8);
-    let (left, right) = TypedTuple::<TupleIndex2, u32>::split_left(tuple);
+    let (left, right) = tuple.split_left::<TupleIndex2>();
     assert_eq!(left, (1u8, 2u16, 3u32));
     assert_eq!(right, (4u64, 5i8));
 }
@@ -41,7 +41,7 @@ fn test_split_left_basic() {
 #[test]
 fn test_split_left_first() {
     let tuple = (1u8, 2u16, 3u32);
-    let (left, right) = TypedTuple::<TupleIndex0, u8>::split_left(tuple);
+    let (left, right) = tuple.split_left::<TupleIndex0>();
     assert_eq!(left, (1u8,));
     assert_eq!(right, (2u16, 3u32));
 }
@@ -49,7 +49,7 @@ fn test_split_left_first() {
 #[test]
 fn test_split_left_last() {
     let tuple = (1u8, 2u16, 3u32);
-    let (left, right) = TypedTuple::<TupleIndex2, u32>::split_left(tuple);
+    let (left, right) = tuple.split_left::<TupleIndex2>();
     assert_eq!(left, (1u8, 2u16, 3u32));
     assert_eq!(right, ());
 }
@@ -57,7 +57,7 @@ fn test_split_left_last() {
 #[test]
 fn test_split_right_basic() {
     let tuple = (1u8, 2u16, 3u32, 4u64, 5i8);
-    let (left, right) = TypedTuple::<TupleIndex2, u32>::split_right(tuple);
+    let (left, right) = tuple.split_right::<TupleIndex2>();
     assert_eq!(left, (1u8, 2u16));
     assert_eq!(right, (3u32, 4u64, 5i8));
 }
@@ -65,7 +65,7 @@ fn test_split_right_basic() {
 #[test]
 fn test_split_right_first() {
     let tuple = (1u8, 2u16, 3u32);
-    let (left, right) = TypedTuple::<TupleIndex0, u8>::split_right(tuple);
+    let (left, right) = tuple.split_right::<TupleIndex0>();
     assert_eq!(left, ());
     assert_eq!(right, (1u8, 2u16, 3u32));
 }
@@ -73,7 +73,7 @@ fn test_split_right_first() {
 #[test]
 fn test_split_right_last() {
     let tuple = (1u8, 2u16, 3u32);
-    let (left, right) = TypedTuple::<TupleIndex2, u32>::split_right(tuple);
+    let (left, right) = tuple.split_right::<TupleIndex2>();
     assert_eq!(left, (1u8, 2u16));
     assert_eq!(right, (3u32,));
 }
@@ -88,12 +88,12 @@ fn test_all_split_methods_together() {
     assert_eq!(right_ex, (4u64, 5i8));
 
     let tuple2 = (1u8, 2u16, 3u32, 4u64, 5i8);
-    let (left_l, right_l) = TypedTuple::<TupleIndex2, u32>::split_left(tuple2);
+    let (left_l, right_l) = tuple2.split_left::<TupleIndex2>();
     assert_eq!(left_l, (1u8, 2u16, 3u32));
     assert_eq!(right_l, (4u64, 5i8));
 
     let tuple3 = (1u8, 2u16, 3u32, 4u64, 5i8);
-    let (left_r, right_r) = TypedTuple::<TupleIndex2, u32>::split_right(tuple3);
+    let (left_r, right_r) = tuple3.split_right::<TupleIndex2>();
     assert_eq!(left_r, (1u8, 2u16));
     assert_eq!(right_r, (3u32, 4u64, 5i8));
 }
@@ -108,12 +108,12 @@ fn test_split_single_element() {
     assert_eq!(right, ());
 
     let tuple = (42u32,);
-    let (left, right) = TypedTuple::<TupleIndex0, u32>::split_left(tuple);
+    let (left, right) = tuple.split_left::<TupleIndex0>();
     assert_eq!(left, (42u32,));
     assert_eq!(right, ());
 
     let tuple = (42u32,);
-    let (left, right) = TypedTuple::<TupleIndex0, u32>::split_right(tuple);
+    let (left, right) = tuple.split_right::<TupleIndex0>();
     assert_eq!(left, ());
     assert_eq!(right, (42u32,));
 }

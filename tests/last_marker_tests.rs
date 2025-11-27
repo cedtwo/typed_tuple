@@ -49,7 +49,7 @@ fn test_last_replace() {
     type LastIdx = <TupleType as LastIndex>::Last;
 
     let mut tuple: TupleType = (String::from("hello"), 42, 3.14);
-    let old: f64 = TypedTuple::<LastIdx, f64>::replace(&mut tuple, 2.71f64);
+    let old: f64 = tuple.replace::<LastIdx>(2.71f64);
     assert_eq!(old, 3.14f64);
     assert_eq!(tuple, (String::from("hello"), 42u32, 2.71f64));
 }
@@ -60,7 +60,7 @@ fn test_last_apply() {
     type LastIdx = <TupleType as LastIndex>::Last;
 
     let mut tuple: TupleType = (1, 2, 3);
-    TypedTuple::<LastIdx, u32>::apply(&mut tuple, |x| *x *= 10);
+    tuple.apply::<LastIdx, _>(|x| *x *= 10);
     assert_eq!(tuple, (1u8, 2u16, 30u32));
 }
 
@@ -70,7 +70,7 @@ fn test_last_apply_string() {
     type LastIdx = <TupleType as LastIndex>::Last;
 
     let mut tuple: TupleType = (42, "hello".to_string());
-    TypedTuple::<LastIdx, String>::apply(&mut tuple, |s| *s = s.to_uppercase());
+    tuple.apply::<LastIdx, _>(|s| *s = s.to_uppercase());
     assert_eq!(tuple, (42, "HELLO".to_string()));
 }
 
@@ -80,7 +80,7 @@ fn test_last_map() {
     type LastIdx = <TupleType as LastIndex>::Last;
 
     let tuple: TupleType = (1, 2, 3, 4);
-    let result: u64 = TypedTuple::<LastIdx, u64>::map(&tuple, |x| x * 2);
+    let result: u64 = tuple.map::<LastIdx, _, _>(|x| x * 2);
     assert_eq!(result, 8u64);
 }
 
@@ -90,7 +90,7 @@ fn test_last_pop_two_elements() {
     type LastIdx = <TupleType as LastIndex>::Last;
 
     let tuple: TupleType = (1, 2);
-    let (last, rest): (u16, _) = TypedTuple::<LastIdx, u16>::pop(tuple);
+    let (last, rest): (u16, _) = tuple.pop::<LastIdx>();
     assert_eq!(last, 2u16);
     assert_eq!(rest, (1u8,));
 }
@@ -101,7 +101,7 @@ fn test_last_pop_three_elements() {
     type LastIdx = <TupleType as LastIndex>::Last;
 
     let tuple: TupleType = (1, 2, 3);
-    let (last, rest): (u32, _) = TypedTuple::<LastIdx, u32>::pop(tuple);
+    let (last, rest): (u32, _) = tuple.pop::<LastIdx>();
     assert_eq!(last, 3u32);
     assert_eq!(rest, (1u8, 2u16));
 }
@@ -116,7 +116,7 @@ fn test_last_take() {
         String::from("second"),
         String::from("last"),
     );
-    let last: String = TypedTuple::<LastIdx, String>::take(&mut tuple);
+    let last: String = tuple.take::<LastIdx>();
     assert_eq!(last, "last");
     assert_eq!(
         tuple,
@@ -142,7 +142,7 @@ fn test_last_split_left() {
     type LastIdx = <TupleType as LastIndex>::Last;
 
     let tuple: TupleType = (1, 2, 3, 4);
-    let (left, right) = TypedTuple::<LastIdx, u64>::split_left(tuple);
+    let (left, right) = tuple.split_left::<LastIdx>();
     assert_eq!(left, (1u8, 2u16, 3u32, 4u64));
     assert_eq!(right, ());
 }
@@ -153,7 +153,7 @@ fn test_last_split_right() {
     type LastIdx = <TupleType as LastIndex>::Last;
 
     let tuple: TupleType = (1, 2, 3, 4);
-    let (left, right) = TypedTuple::<LastIdx, u64>::split_right(tuple);
+    let (left, right) = tuple.split_right::<LastIdx>();
     assert_eq!(left, (1u8, 2u16, 3u32));
     assert_eq!(right, (4u64,));
 }
@@ -218,33 +218,6 @@ fn test_last_swap() {
     let mut tuple: TupleType = (1, 2, 3);
 
     // Swap first and last u32
-    TypedTuple::<TupleIndex0, u32>::swap::<LastIdx>(&mut tuple);
+    tuple.swap::<TupleIndex0, LastIdx>();
     assert_eq!(tuple, (3u32, 2u32, 1u32));
-}
-
-#[test]
-fn test_last_with_extension_trait() {
-    type TupleType = (u8, u16, u32, u64);
-    type LastIdx = <TupleType as LastIndex>::Last;
-
-    let tuple: TupleType = (1, 2, 3, 4);
-    let (val, rest) = tuple.pop_at::<LastIdx>();
-    assert_eq!(val, 4u64);
-    assert_eq!(rest, (1u8, 2u16, 3u32));
-}
-
-#[test]
-fn test_last_split_at_extension_methods() {
-    type TupleType = (u8, u16, u32, u64);
-    type LastIdx = <TupleType as LastIndex>::Last;
-
-    let tuple: TupleType = (1, 2, 3, 4);
-    let (left, right) = tuple.split_left_at::<LastIdx>();
-    assert_eq!(left, (1u8, 2u16, 3u32, 4u64));
-    assert_eq!(right, ());
-
-    let tuple: TupleType = (1, 2, 3, 4);
-    let (left, right) = tuple.split_right_at::<LastIdx>();
-    assert_eq!(left, (1u8, 2u16, 3u32));
-    assert_eq!(right, (4u64,));
 }
