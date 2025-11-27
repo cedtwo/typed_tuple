@@ -1,21 +1,20 @@
 [package]
-name = "typed_tuple"
-authors = ["Christopher Edward Dawn"]
+name = "typed_tuple_macros"
 version = "0.1.0"
-edition = "2024"
-description = "Type based operations on primitive tuple elements."
-readme = "README.md"
-repository = "https://github.com/cedtwo/typed_tuple.git"
+edition = "2021"
 license = "MIT OR Apache-2.0"
-keywords = ["tuple", "type", "typed", "heterogenous"]
-categories = ["data-structures", "rust-patterns"]
 
 [features]
 default = []
-len_128 = ["typed_tuple_macros/len_128"]
+len_128 = []
+
+[lib]
+proc-macro = true
 
 [dependencies]
-typed_tuple_macros = { path = "typed_tuple_macros" }
+proc-macro2 = "1.0"
+quote = "1.0"
+syn = { version = "2.0", features = ["full"] }
 
 [lints.rust]
 missing_docs = "forbid"
