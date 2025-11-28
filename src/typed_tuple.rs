@@ -13,11 +13,13 @@ pub trait TypedTuple<T>: Sized {
     /// let a: &&str = tuple.get();
     /// let b: &char = tuple.get();
     /// let c: &usize = tuple.get();
+    /// assert_eq!((a, b, c), (&"a", &'b', &2));
     ///
-    /// // Get by 'const' index.
-    /// let a = IndexedTuple::<TupleIndex0, _>::get(&tuple);
-    /// let b = IndexedTuple::<TupleIndex1, _>::get(&tuple);
-    /// let c = IndexedTuple::<TupleIndex2, _>::get(&tuple);
+    /// // Get by index.
+    /// let a = tuple.get::<TupleIndex0>();
+    /// let b = tuple.get::<TupleIndex1>();
+    /// let c = tuple.get::<TupleIndex2>();
+    /// assert_eq!((a, b, c), (&"a", &'b', &2));
     /// ```
     #[inline]
     fn get<INDEX>(&self) -> &T
@@ -39,10 +41,10 @@ pub trait TypedTuple<T>: Sized {
     /// *tuple.get_mut() = 3usize;
     /// assert_eq!(tuple, ("c", 'd', 3));
     ///
-    /// // Mutate by 'const' index.
-    /// *IndexedTuple::<TupleIndex0, _>::get_mut(&mut tuple) = "e";
-    /// *IndexedTuple::<TupleIndex1, _>::get_mut(&mut tuple) = 'f';
-    /// *IndexedTuple::<TupleIndex2, _>::get_mut(&mut tuple) = 4usize;
+    /// // Mutate by index.
+    /// *tuple.get_mut::<TupleIndex0>() = "e";
+    /// *tuple.get_mut::<TupleIndex1>() = 'f';
+    /// *tuple.get_mut::<TupleIndex2>() = 4usize;
     /// assert_eq!(tuple, ("e", 'f', 4))
     /// ```
     #[inline]
@@ -69,7 +71,7 @@ pub trait TypedTuple<T>: Sized {
     /// ```rust
     /// # use typed_tuple::prelude::*;
     /// let tuple = (1u8, 2u16, 3u32, 4u64, 5i8);
-    /// let (left, element, right) = IndexedTuple::<TupleIndex2, u32>::split_exclusive(tuple);
+    /// let (left, element, right) = tuple.split_exclusive::<TupleIndex2>();
     /// assert_eq!(left, (1u8, 2u16));
     /// assert_eq!(element, 3u32);
     /// assert_eq!(right, (4u64, 5i8));
@@ -97,7 +99,7 @@ pub trait TypedTuple<T>: Sized {
     /// # Example
     ///
     /// ```rust
-    /// # use typed_tuple::prelude::IndexedTuple;
+    /// # use typed_tuple::prelude::*;
     /// let mut tuple = (10u32, 20u64);
     /// let old = tuple.replace(30u32);
     /// assert_eq!(old, 10u32);
@@ -123,10 +125,10 @@ pub trait TypedTuple<T>: Sized {
     /// tuple.apply(|el: &mut usize| *el += 2);
     /// assert_eq!(tuple, ("A".to_string(), 2, 4));
     ///
-    /// // Apply by 'const' index.
-    /// IndexedTuple::<TupleIndex0, _>::apply(&mut tuple, |el| *el = el.to_lowercase());
-    /// IndexedTuple::<TupleIndex1, _>::apply(&mut tuple, |el| *el -= 1);
-    /// IndexedTuple::<TupleIndex2, _>::apply(&mut tuple, |el| *el -= 2);
+    /// // Apply by index.
+    /// tuple.apply::<TupleIndex0, _>(|el| *el = el.to_lowercase());
+    /// tuple.apply::<TupleIndex1, _>(|el| *el -= 1);
+    /// tuple.apply::<TupleIndex2, _>(|el| *el -= 2);
     /// assert_eq!(tuple, ("a".to_string(), 1, 2))
     /// ```
     fn apply<INDEX, FN: FnOnce(&mut T)>(&mut self, f: FN)
@@ -144,12 +146,13 @@ pub trait TypedTuple<T>: Sized {
     ///
     /// ```rust
     /// # use typed_tuple::prelude::*;
-    ///
+    /// // Map by type.
     /// let tuple = (10u32, 20u64);
     /// let result = tuple.map(|x: &u32| x * 2);
     /// assert_eq!(result, 20u32);
     ///
-    /// let result = tuple.map(|x: &u64| x + 5);
+    /// // Map by index.
+    /// let result = tuple.map::<TupleIndex1, _, _>(|x| x + 5);
     /// assert_eq!(result, 25u64);
     /// ```
     fn map<INDEX, FN, R>(&self, f: FN) -> R
@@ -169,6 +172,7 @@ pub trait TypedTuple<T>: Sized {
     /// ```rust
     /// # use typed_tuple::prelude::*;
     ///
+    /// // Map by type.
     /// let mut tuple = (10u32, 20u64);
     /// let result = tuple.map_mut(|x: &mut u32| {
     ///     *x += 5;
@@ -177,7 +181,8 @@ pub trait TypedTuple<T>: Sized {
     /// assert_eq!(result, 30u32);
     /// assert_eq!(tuple, (15u32, 20u64));
     ///
-    /// let result = tuple.map_mut(|x: &mut u64| {
+    /// // Map by index.
+    /// let result = tuple.map_mut::<TupleIndex1, _, _>(|x| {
     ///     *x *= 2;
     ///     *x
     /// });
@@ -211,9 +216,9 @@ pub trait TypedTuple<T>: Sized {
     /// assert_eq!(s, "a");
     /// assert_eq!(rest, ('b', 2usize));
     ///
-    /// // Pop by 'const' index.
+    /// // Pop by index.
     /// let tuple = ("a", 'b', 2usize);
-    /// let (c, rest) = IndexedTuple::<TupleIndex1, _>::pop(tuple);
+    /// let (c, rest) = tuple.pop::<TupleIndex1>();
     /// assert_eq!(c, 'b');
     /// assert_eq!(rest, ("a", 2usize));
     /// ```
@@ -226,9 +231,9 @@ pub trait TypedTuple<T>: Sized {
         (element, left.chain_right(right))
     }
 
-    /// Swaps the element at INDEX with the element at OTHER_INDEX.
+    /// Swaps the element at INDEX with the element at OTHER.
     ///
-    /// Both indices must contain elements of type `T`. If INDEX == OTHER_INDEX,
+    /// Both indices must contain elements of type `T`. If INDEX == OTHER,
     /// this is a no-op.
     ///
     /// # Example
@@ -236,7 +241,7 @@ pub trait TypedTuple<T>: Sized {
     /// ```rust
     /// # use typed_tuple::prelude::*;
     /// let mut tuple = (1u32, "hello", 2u32, 'x', 3u32);
-    /// IndexedTuple::<TupleIndex0, u32>::swap::<TupleIndex2>(&mut tuple);
+    /// tuple.swap::<TupleIndex0, TupleIndex2>();
     /// assert_eq!(tuple, (2u32, "hello", 1u32, 'x', 3u32));
     /// ```
     #[inline]
@@ -265,7 +270,7 @@ pub trait TypedTuple<T>: Sized {
     /// # Example
     ///
     /// ```rust
-    /// # use typed_tuple::prelude::IndexedTuple;
+    /// # use typed_tuple::prelude::*;
     /// let mut tuple = (String::from("hello"), 42, 3.14);
     /// let s: String = tuple.take();
     /// assert_eq!(s, "hello");
@@ -297,7 +302,7 @@ pub trait TypedTuple<T>: Sized {
     /// ```rust
     /// # use typed_tuple::prelude::*;
     /// let tuple = (1u8, 2u16, 3u32, 4u64, 5i8);
-    /// let (left, right) = IndexedTuple::<TupleIndex2, u32>::split_left(tuple);
+    /// let (left, right) = tuple.split_left::<TupleIndex2>();
     /// assert_eq!(left, (1u8, 2u16, 3u32));
     /// assert_eq!(right, (4u64, 5i8));
     /// ```
@@ -326,7 +331,7 @@ pub trait TypedTuple<T>: Sized {
     /// ```rust
     /// # use typed_tuple::prelude::*;
     /// let tuple = (1u8, 2u16, 3u32, 4u64, 5i8);
-    /// let (left, right) = IndexedTuple::<TupleIndex2, u32>::split_right(tuple);
+    /// let (left, right) = tuple.split_right::<TupleIndex2>();
     /// assert_eq!(left, (1u8, 2u16));
     /// assert_eq!(right, (3u32, 4u64, 5i8));
     /// ```
@@ -355,7 +360,7 @@ pub trait TypedTuple<T>: Sized {
     /// ```rust
     /// # use typed_tuple::prelude::*;
     /// let tuple = (1u8, 2u16, 3u32, 4u64, 5i8);
-    /// let (left, right) = IndexedTuple::<TupleIndex2, u32>::split_inclusive(tuple);
+    /// let (left, right) = tuple.split_inclusive::<TupleIndex2>();
     /// assert_eq!(left, (1u8, 2u16, 3u32));
     /// assert_eq!(right, (3u32, 4u64, 5i8));
     /// ```
