@@ -248,15 +248,15 @@ pub fn generate_typed_tuple_impls(_input: TokenStream) -> TokenStream {
                     type SplitRightInclusive = <(#target_type,) as ChainRight<Self::SplitRightExclusive>>::Output;
 
                     #[inline]
-                    fn get(&self) -> &#target_type {
+                    fn get_at(&self) -> &#target_type {
                         &self.#index_lit
                     }
                     #[inline]
-                    fn get_mut(&mut self) -> &mut #target_type {
+                    fn get_mut_at(&mut self) -> &mut #target_type {
                         &mut self.#index_lit
                     }
                     #[inline]
-                    fn split_exclusive(self) -> (Self::SplitLeftExclusive, #target_type, Self::SplitRightExclusive) {
+                    fn split_exclusive_at(self) -> (Self::SplitLeftExclusive, #target_type, Self::SplitRightExclusive) {
                         ((#(self.#split_left_exclusive_indices,)*), self.#index_lit, (#(self.#split_right_exclusive_indices,)*))
                     }
                 }

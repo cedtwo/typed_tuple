@@ -4,6 +4,85 @@ use crate::prelude::*;
 
 /// Extension trait to add additional methods to TypedTuple.
 pub trait TypedTuple<T>: Sized {
+    /// Get a reference to the element of type `T`.
+    /// # Example
+    /// ```
+    /// # use typed_tuple::prelude::*;
+    /// // Get by type.
+    /// let tuple = ("a", 'b', 2usize);
+    /// let a: &&str = tuple.get();
+    /// let b: &char = tuple.get();
+    /// let c: &usize = tuple.get();
+    ///
+    /// // Get by 'const' index.
+    /// let a = IndexedTuple::<TupleIndex0, _>::get(&tuple);
+    /// let b = IndexedTuple::<TupleIndex1, _>::get(&tuple);
+    /// let c = IndexedTuple::<TupleIndex2, _>::get(&tuple);
+    /// ```
+    #[inline]
+    fn get<INDEX>(&self) -> &T
+    where
+        Self: IndexedTuple<INDEX, T>,
+        INDEX: TupleIndex,
+    {
+        IndexedTuple::<INDEX, T>::get_at(self)
+    }
+
+    /// Get a mutable reference to the element of type `T`.
+    /// # Example
+    /// ```
+    /// # use typed_tuple::prelude::*;
+    /// // Mutate by type.
+    /// let mut tuple = ("a", 'b', 2usize);
+    /// *tuple.get_mut() = "c";
+    /// *tuple.get_mut() = 'd';
+    /// *tuple.get_mut() = 3usize;
+    /// assert_eq!(tuple, ("c", 'd', 3));
+    ///
+    /// // Mutate by 'const' index.
+    /// *IndexedTuple::<TupleIndex0, _>::get_mut(&mut tuple) = "e";
+    /// *IndexedTuple::<TupleIndex1, _>::get_mut(&mut tuple) = 'f';
+    /// *IndexedTuple::<TupleIndex2, _>::get_mut(&mut tuple) = 4usize;
+    /// assert_eq!(tuple, ("e", 'f', 4))
+    /// ```
+    #[inline]
+    fn get_mut<INDEX>(&mut self) -> &mut T
+    where
+        Self: IndexedTuple<INDEX, T>,
+        INDEX: TupleIndex,
+    {
+        IndexedTuple::<INDEX, T>::get_mut_at(self)
+    }
+
+    /// Splits the tuple exclusively at INDEX, returning the element and the
+    /// surrounding tuples.
+    ///
+    /// # Returns
+    ///
+    /// A tuple containing (left_exclusive, element, right_exclusive) where:
+    /// - `left_exclusive` contains elements [0..INDEX)
+    /// - `element` is the element at INDEX
+    /// - `right_exclusive` contains elements (INDEX..)
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// # use typed_tuple::prelude::*;
+    /// let tuple = (1u8, 2u16, 3u32, 4u64, 5i8);
+    /// let (left, element, right) = IndexedTuple::<TupleIndex2, u32>::split_exclusive(tuple);
+    /// assert_eq!(left, (1u8, 2u16));
+    /// assert_eq!(element, 3u32);
+    /// assert_eq!(right, (4u64, 5i8));
+    /// ```
+    #[inline]
+    fn split_exclusive<INDEX>(self) -> (Self::SplitLeftExclusive, T, Self::SplitRightExclusive)
+    where
+        Self: IndexedTuple<INDEX, T>,
+        INDEX: TupleIndex,
+    {
+        IndexedTuple::<INDEX, T>::split_exclusive_at(self)
+    }
+
     /// Replaces the element of type `T` with the provided value, returning the
     /// old value.
     ///
@@ -25,12 +104,12 @@ pub trait TypedTuple<T>: Sized {
     /// assert_eq!(tuple, (30u32, 20u64));
     /// ```
     #[inline]
-    fn replace<INDEX: TupleIndex>(&mut self, value: T) -> T
+    fn replace<INDEX>(&mut self, value: T) -> T
     where
         Self: IndexedTuple<INDEX, T>,
         INDEX: TupleIndex,
     {
-        core::mem::replace(self.get_mut(), value)
+        core::mem::replace(self.get_mut::<INDEX>(), value)
     }
 
     /// Takes a closure, mutating the element of type `T`.
@@ -50,7 +129,7 @@ pub trait TypedTuple<T>: Sized {
     /// IndexedTuple::<TupleIndex2, _>::apply(&mut tuple, |el| *el -= 2);
     /// assert_eq!(tuple, ("a".to_string(), 1, 2))
     /// ```
-    fn apply<INDEX: TupleIndex, FN: FnOnce(&mut T)>(&mut self, f: FN)
+    fn apply<INDEX, FN: FnOnce(&mut T)>(&mut self, f: FN)
     where
         Self: IndexedTuple<INDEX, T>,
         INDEX: TupleIndex,
@@ -73,7 +152,7 @@ pub trait TypedTuple<T>: Sized {
     /// let result = tuple.map(|x: &u64| x + 5);
     /// assert_eq!(result, 25u64);
     /// ```
-    fn map<INDEX: TupleIndex, FN, R>(&self, f: FN) -> R
+    fn map<INDEX, FN, R>(&self, f: FN) -> R
     where
         Self: IndexedTuple<INDEX, T>,
         INDEX: TupleIndex,
@@ -105,7 +184,7 @@ pub trait TypedTuple<T>: Sized {
     /// assert_eq!(result, 40u64);
     /// assert_eq!(tuple, (15u32, 40u64));
     /// ```
-    fn map_mut<INDEX: TupleIndex, FN, R>(&mut self, f: FN) -> R
+    fn map_mut<INDEX, FN, R>(&mut self, f: FN) -> R
     where
         Self: IndexedTuple<INDEX, T>,
         INDEX: TupleIndex,
@@ -138,7 +217,7 @@ pub trait TypedTuple<T>: Sized {
     /// assert_eq!(c, 'b');
     /// assert_eq!(rest, ("a", 2usize));
     /// ```
-    fn pop<INDEX: TupleIndex>(self) -> (T, Self::PopOutput)
+    fn pop<INDEX>(self) -> (T, Self::PopOutput)
     where
         Self: IndexedTuple<INDEX, T>,
         INDEX: TupleIndex,
@@ -147,7 +226,6 @@ pub trait TypedTuple<T>: Sized {
         (element, left.chain_right(right))
     }
 
-    #[inline]
     /// Swaps the element at INDEX with the element at OTHER_INDEX.
     ///
     /// Both indices must contain elements of type `T`. If INDEX == OTHER_INDEX,
@@ -161,6 +239,7 @@ pub trait TypedTuple<T>: Sized {
     /// IndexedTuple::<TupleIndex0, u32>::swap::<TupleIndex2>(&mut tuple);
     /// assert_eq!(tuple, (2u32, "hello", 1u32, 'x', 3u32));
     /// ```
+    #[inline]
     fn swap<INDEX, OTHER>(&mut self)
     where
         Self: IndexedTuple<INDEX, T> + IndexedTuple<OTHER, T>,
@@ -170,8 +249,8 @@ pub trait TypedTuple<T>: Sized {
         if INDEX::INDEX != OTHER::INDEX {
             unsafe {
                 let ptr = self as *mut Self;
-                let field1 = <Self as IndexedTuple<INDEX, T>>::get_mut(&mut *ptr);
-                let field2 = <Self as IndexedTuple<OTHER, T>>::get_mut(&mut *ptr);
+                let field1 = (&mut *ptr).get_mut::<INDEX>();
+                let field2 = (&mut *ptr).get_mut::<OTHER>();
                 core::mem::swap(field1, field2);
             }
         }

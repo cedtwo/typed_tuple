@@ -15,7 +15,7 @@ where
     T: IndexedTuple<TupleIndex0, u32>,
 {
     fn increment(&mut self) {
-        let current: &u32 = self.get();
+        let current: &u32 = (*self).get();
         self.replace(*current + 1);
     }
 }

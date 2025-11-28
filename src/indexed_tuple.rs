@@ -53,7 +53,7 @@ pub trait IndexedTuple<INDEX: TupleIndex, T>:
     /// let b = IndexedTuple::<TupleIndex1, _>::get(&tuple);
     /// let c = IndexedTuple::<TupleIndex2, _>::get(&tuple);
     /// ```
-    fn get(&self) -> &T;
+    fn get_at(&self) -> &T;
 
     /// Get a mutable reference to the element of type `T`.
     /// # Example
@@ -72,7 +72,7 @@ pub trait IndexedTuple<INDEX: TupleIndex, T>:
     /// *IndexedTuple::<TupleIndex2, _>::get_mut(&mut tuple) = 4usize;
     /// assert_eq!(tuple, ("e", 'f', 4))
     /// ```
-    fn get_mut(&mut self) -> &mut T;
+    fn get_mut_at(&mut self) -> &mut T;
 
     /// Splits the tuple exclusively at INDEX, returning the element and the
     /// surrounding tuples.
@@ -94,5 +94,5 @@ pub trait IndexedTuple<INDEX: TupleIndex, T>:
     /// assert_eq!(element, 3u32);
     /// assert_eq!(right, (4u64, 5i8));
     /// ```
-    fn split_exclusive(self) -> (Self::SplitLeftExclusive, T, Self::SplitRightExclusive);
+    fn split_exclusive_at(self) -> (Self::SplitLeftExclusive, T, Self::SplitRightExclusive);
 }
