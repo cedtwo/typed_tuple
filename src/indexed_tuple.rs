@@ -44,14 +44,14 @@ pub trait IndexedTuple<INDEX: TupleIndex, T>:
     /// # use typed_tuple::prelude::*;
     /// // Get by type.
     /// let tuple = ("a", 'b', 2usize);
-    /// let a: &&str = tuple.get();
-    /// let b: &char = tuple.get();
-    /// let c: &usize = tuple.get();
+    /// let a: &&str = tuple.get_at();
+    /// let b: &char = tuple.get_at();
+    /// let c: &usize = tuple.get_at();
     ///
     /// // Get by 'const' index.
-    /// let a = IndexedTuple::<TupleIndex0, _>::get(&tuple);
-    /// let b = IndexedTuple::<TupleIndex1, _>::get(&tuple);
-    /// let c = IndexedTuple::<TupleIndex2, _>::get(&tuple);
+    /// let a = IndexedTuple::<TupleIndex0, _>::get_at(&tuple);
+    /// let b = IndexedTuple::<TupleIndex1, _>::get_at(&tuple);
+    /// let c = IndexedTuple::<TupleIndex2, _>::get_at(&tuple);
     /// ```
     fn get_at(&self) -> &T;
 
@@ -61,15 +61,15 @@ pub trait IndexedTuple<INDEX: TupleIndex, T>:
     /// # use typed_tuple::prelude::*;
     /// // Mutate by type.
     /// let mut tuple = ("a", 'b', 2usize);
-    /// *tuple.get_mut() = "c";
-    /// *tuple.get_mut() = 'd';
-    /// *tuple.get_mut() = 3usize;
+    /// *tuple.get_mut_at() = "c";
+    /// *tuple.get_mut_at() = 'd';
+    /// *tuple.get_mut_at() = 3usize;
     /// assert_eq!(tuple, ("c", 'd', 3));
     ///
     /// // Mutate by 'const' index.
-    /// *IndexedTuple::<TupleIndex0, _>::get_mut(&mut tuple) = "e";
-    /// *IndexedTuple::<TupleIndex1, _>::get_mut(&mut tuple) = 'f';
-    /// *IndexedTuple::<TupleIndex2, _>::get_mut(&mut tuple) = 4usize;
+    /// *IndexedTuple::<TupleIndex0, _>::get_mut_at(&mut tuple) = "e";
+    /// *IndexedTuple::<TupleIndex1, _>::get_mut_at(&mut tuple) = 'f';
+    /// *IndexedTuple::<TupleIndex2, _>::get_mut_at(&mut tuple) = 4usize;
     /// assert_eq!(tuple, ("e", 'f', 4))
     /// ```
     fn get_mut_at(&mut self) -> &mut T;
@@ -89,7 +89,7 @@ pub trait IndexedTuple<INDEX: TupleIndex, T>:
     /// ```rust
     /// # use typed_tuple::prelude::*;
     /// let tuple = (1u8, 2u16, 3u32, 4u64, 5i8);
-    /// let (left, element, right) = IndexedTuple::<TupleIndex2, u32>::split_exclusive(tuple);
+    /// let (left, element, right) = IndexedTuple::<TupleIndex2, u32>::split_exclusive_at(tuple);
     /// assert_eq!(left, (1u8, 2u16));
     /// assert_eq!(element, 3u32);
     /// assert_eq!(right, (4u64, 5i8));
