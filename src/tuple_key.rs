@@ -17,7 +17,7 @@ use crate::prelude::*;
 /// # Examples
 ///
 /// ```rust
-/// use typed_tuple::prelude::{TupleIndex0, TupleIndex1, TupleIndex2, TupleKey, TypedTuple};
+/// use typed_tuple::prelude::*;
 ///
 /// struct AgeMarker;
 ///
@@ -27,7 +27,7 @@ use crate::prelude::*;
 ///
 /// impl<T> GetAge for T
 /// where
-///     Self: TypedTuple<<AgeMarker as TupleKey<Self>>::Idx, u8>,
+///     Self: IndexedTuple<<AgeMarker as TupleKey<Self>>::Idx, u8>,
 ///     AgeMarker: TupleKey<Self>,
 /// {
 ///     fn age(&self) -> u8 {
