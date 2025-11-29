@@ -138,7 +138,7 @@ trait GetAge {
 // Blanket implementation for any tuple that can be keyed by AgeMarker
 impl<T> GetAge for T
 where
-    Self: IndexedTuple<<AgeMarker as TupleKey<Self>>::Idx, u8>,
+    Self: TypedIndex<<AgeMarker as TupleKey<Self>>::Idx, u8>,
     AgeMarker: TupleKey<Self>,
 {
     fn age(&self) -> u8 {

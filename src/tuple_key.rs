@@ -27,7 +27,7 @@ use crate::prelude::*;
 ///
 /// impl<T> GetAge for T
 /// where
-///     Self: IndexedTuple<<AgeMarker as TupleKey<Self>>::Idx, u8>,
+///     Self: TypedIndex<<AgeMarker as TupleKey<Self>>::Idx, u8>,
 ///     AgeMarker: TupleKey<Self>,
 /// {
 ///     fn age(&self) -> u8 {

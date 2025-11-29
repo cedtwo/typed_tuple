@@ -3,7 +3,7 @@
 use crate::prelude::*;
 
 /// Trait for mapping an index (or indices) to a type (or types).
-pub trait IndexedTuple<INDEX: TupleIndex, T>:
+pub trait TypedIndex<INDEX: TupleIndex, T>:
     Sized + NthIndex<INDEX> + LastIndex<Last: TupleIndexSub<INDEX>> + NthIndexedUntil<INDEX>
 {
     /// The type of the remaining tuple after popping element of type `T`.
@@ -18,7 +18,7 @@ pub trait IndexedTuple<INDEX: TupleIndex, T>:
     type SplitLeftInclusive: NthIndexedAs<INDEX, Self>
         + TypedUntil<INDEX>
         + NthIndexedUntil<INDEX>
-        + IndexedTuple<
+        + TypedIndex<
             INDEX,
             T,
             SplitLeftExclusive = Self::SplitLeftExclusive,
@@ -31,7 +31,7 @@ pub trait IndexedTuple<INDEX: TupleIndex, T>:
         + ChainLeft<Self::SplitLeftInclusive, Output = Self>;
     /// The type of the right tuple when splitting inclusively (includes element
     /// at INDEX): [INDEX, ..].
-    type SplitRightInclusive: IndexedTuple<
+    type SplitRightInclusive: TypedIndex<
             TupleIndex0,
             T,
             SplitRightExclusive = Self::SplitRightExclusive,
@@ -49,9 +49,9 @@ pub trait IndexedTuple<INDEX: TupleIndex, T>:
     /// let c: &usize = tuple.get_at();
     ///
     /// // Get by 'const' index.
-    /// let a = IndexedTuple::<TupleIndex0, _>::get_at(&tuple);
-    /// let b = IndexedTuple::<TupleIndex1, _>::get_at(&tuple);
-    /// let c = IndexedTuple::<TupleIndex2, _>::get_at(&tuple);
+    /// let a = TypedIndex::<TupleIndex0, _>::get_at(&tuple);
+    /// let b = TypedIndex::<TupleIndex1, _>::get_at(&tuple);
+    /// let c = TypedIndex::<TupleIndex2, _>::get_at(&tuple);
     /// ```
     fn get_at(&self) -> &T;
 
@@ -67,9 +67,9 @@ pub trait IndexedTuple<INDEX: TupleIndex, T>:
     /// assert_eq!(tuple, ("c", 'd', 3));
     ///
     /// // Mutate by 'const' index.
-    /// *IndexedTuple::<TupleIndex0, _>::get_mut_at(&mut tuple) = "e";
-    /// *IndexedTuple::<TupleIndex1, _>::get_mut_at(&mut tuple) = 'f';
-    /// *IndexedTuple::<TupleIndex2, _>::get_mut_at(&mut tuple) = 4usize;
+    /// *TypedIndex::<TupleIndex0, _>::get_mut_at(&mut tuple) = "e";
+    /// *TypedIndex::<TupleIndex1, _>::get_mut_at(&mut tuple) = 'f';
+    /// *TypedIndex::<TupleIndex2, _>::get_mut_at(&mut tuple) = 4usize;
     /// assert_eq!(tuple, ("e", 'f', 4))
     /// ```
     fn get_mut_at(&mut self) -> &mut T;
@@ -89,7 +89,7 @@ pub trait IndexedTuple<INDEX: TupleIndex, T>:
     /// ```rust
     /// # use typed_tuple::prelude::*;
     /// let tuple = (1u8, 2u16, 3u32, 4u64, 5i8);
-    /// let (left, element, right) = IndexedTuple::<TupleIndex2, u32>::split_exclusive_at(tuple);
+    /// let (left, element, right) = TypedIndex::<TupleIndex2, u32>::split_exclusive_at(tuple);
     /// assert_eq!(left, (1u8, 2u16));
     /// assert_eq!(element, 3u32);
     /// assert_eq!(right, (4u64, 5i8));

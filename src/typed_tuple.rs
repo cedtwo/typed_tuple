@@ -24,10 +24,10 @@ pub trait TypedTuple<T>: Sized {
     #[inline]
     fn get<INDEX>(&self) -> &T
     where
-        Self: IndexedTuple<INDEX, T>,
+        Self: TypedIndex<INDEX, T>,
         INDEX: TupleIndex,
     {
-        IndexedTuple::<INDEX, T>::get_at(self)
+        TypedIndex::<INDEX, T>::get_at(self)
     }
 
     /// Get a mutable reference to the element of type `T`.
@@ -50,10 +50,10 @@ pub trait TypedTuple<T>: Sized {
     #[inline]
     fn get_mut<INDEX>(&mut self) -> &mut T
     where
-        Self: IndexedTuple<INDEX, T>,
+        Self: TypedIndex<INDEX, T>,
         INDEX: TupleIndex,
     {
-        IndexedTuple::<INDEX, T>::get_mut_at(self)
+        TypedIndex::<INDEX, T>::get_mut_at(self)
     }
 
     /// Splits the tuple exclusively at INDEX, returning the element and the
@@ -79,10 +79,10 @@ pub trait TypedTuple<T>: Sized {
     #[inline]
     fn split_exclusive<INDEX>(self) -> (Self::SplitLeftExclusive, T, Self::SplitRightExclusive)
     where
-        Self: IndexedTuple<INDEX, T>,
+        Self: TypedIndex<INDEX, T>,
         INDEX: TupleIndex,
     {
-        IndexedTuple::<INDEX, T>::split_exclusive_at(self)
+        TypedIndex::<INDEX, T>::split_exclusive_at(self)
     }
 
     /// Replaces the element of type `T` with the provided value, returning the
@@ -108,7 +108,7 @@ pub trait TypedTuple<T>: Sized {
     #[inline]
     fn replace<INDEX>(&mut self, value: T) -> T
     where
-        Self: IndexedTuple<INDEX, T>,
+        Self: TypedIndex<INDEX, T>,
         INDEX: TupleIndex,
     {
         core::mem::replace(self.get_mut::<INDEX>(), value)
@@ -133,7 +133,7 @@ pub trait TypedTuple<T>: Sized {
     /// ```
     fn apply<INDEX, FN: FnOnce(&mut T)>(&mut self, f: FN)
     where
-        Self: IndexedTuple<INDEX, T>,
+        Self: TypedIndex<INDEX, T>,
         INDEX: TupleIndex,
     {
         f(self.get_mut());
@@ -157,7 +157,7 @@ pub trait TypedTuple<T>: Sized {
     /// ```
     fn map<INDEX, FN, R>(&self, f: FN) -> R
     where
-        Self: IndexedTuple<INDEX, T>,
+        Self: TypedIndex<INDEX, T>,
         INDEX: TupleIndex,
         FN: FnOnce(&T) -> R,
     {
@@ -191,7 +191,7 @@ pub trait TypedTuple<T>: Sized {
     /// ```
     fn map_mut<INDEX, FN, R>(&mut self, f: FN) -> R
     where
-        Self: IndexedTuple<INDEX, T>,
+        Self: TypedIndex<INDEX, T>,
         INDEX: TupleIndex,
         FN: FnOnce(&mut T) -> R,
     {
@@ -224,7 +224,7 @@ pub trait TypedTuple<T>: Sized {
     /// ```
     fn pop<INDEX>(self) -> (T, Self::PopOutput)
     where
-        Self: IndexedTuple<INDEX, T>,
+        Self: TypedIndex<INDEX, T>,
         INDEX: TupleIndex,
     {
         let (left, element, right) = self.split_exclusive();
@@ -247,7 +247,7 @@ pub trait TypedTuple<T>: Sized {
     #[inline]
     fn swap<INDEX, OTHER>(&mut self)
     where
-        Self: IndexedTuple<INDEX, T> + IndexedTuple<OTHER, T>,
+        Self: TypedIndex<INDEX, T> + TypedIndex<OTHER, T>,
         INDEX: TupleIndex,
         OTHER: TupleIndex,
     {
@@ -279,7 +279,7 @@ pub trait TypedTuple<T>: Sized {
     #[inline]
     fn take<INDEX>(&mut self) -> T
     where
-        Self: IndexedTuple<INDEX, T>,
+        Self: TypedIndex<INDEX, T>,
         INDEX: TupleIndex,
         T: Default,
     {
@@ -308,7 +308,7 @@ pub trait TypedTuple<T>: Sized {
     /// ```
     fn split_left<INDEX>(self) -> (Self::SplitLeftInclusive, Self::SplitRightExclusive)
     where
-        Self: IndexedTuple<INDEX, T>,
+        Self: TypedIndex<INDEX, T>,
         INDEX: TupleIndex,
     {
         let (left_exclusive, element, right_exclusive) = self.split_exclusive();
@@ -337,7 +337,7 @@ pub trait TypedTuple<T>: Sized {
     /// ```
     fn split_right<INDEX>(self) -> (Self::SplitLeftExclusive, Self::SplitRightInclusive)
     where
-        Self: IndexedTuple<INDEX, T>,
+        Self: TypedIndex<INDEX, T>,
         INDEX: TupleIndex,
     {
         let (left_exclusive, element, right_exclusive) = self.split_exclusive();
@@ -366,7 +366,7 @@ pub trait TypedTuple<T>: Sized {
     /// ```
     fn split_inclusive<INDEX>(self) -> (Self::SplitLeftInclusive, Self::SplitRightInclusive)
     where
-        Self: IndexedTuple<INDEX, T>,
+        Self: TypedIndex<INDEX, T>,
         INDEX: TupleIndex,
         T: Clone,
     {
