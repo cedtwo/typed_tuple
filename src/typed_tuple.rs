@@ -1,6 +1,5 @@
-//! Submodule for TypedTuple extension traits.
-
-use crate::{prelude::*, typed_index::TypedBounds};
+//! Submodule for trait bound mapping.
+use crate::prelude::*;
 
 /// Extension trait to add additional methods to TypedTuple.
 pub trait TypedTuple<T>: Sized {
