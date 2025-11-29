@@ -8,9 +8,9 @@ pub mod last_index;
 pub mod nth_index;
 pub mod tuple_index;
 pub mod tuple_key;
+pub mod typed_bounds;
 pub mod typed_first;
 pub mod typed_index;
-pub mod typed_bounds;
 pub mod typed_last;
 pub mod typed_nth;
 pub mod typed_tuple;
@@ -26,9 +26,9 @@ pub mod prelude {
         nth_index::NthIndex,
         tuple_index::TupleIndex,
         tuple_key::TupleKey,
+        typed_bounds::TypedBounds,
         typed_first::TypedFirst,
         typed_index::TypedIndex,
-        typed_bounds::TypedBounds,
         typed_last::TypedLast,
         typed_nth::TypedNth,
         typed_tuple::TypedTuple,
