@@ -241,11 +241,6 @@ pub fn generate_typed_tuple_impls(_input: TokenStream) -> TokenStream {
 
             impls.push(quote! {
                 impl<#(#type_params),*> TypedIndex<#index_marker, #target_type> for (#(#type_params,)*) {
-                    type PopOutput = <Self::SplitLeftExclusive as ChainRight<Self::SplitRightExclusive>>::Output;
-                    type SplitLeftExclusive = (#(#split_left_exclusive_types,)*);
-                    type SplitLeftInclusive = <Self::SplitLeftExclusive as ChainRight<(#target_type,)>>::Output;
-                    type SplitRightExclusive = (#(#split_right_exclusive_types,)*);
-                    type SplitRightInclusive = <(#target_type,) as ChainRight<Self::SplitRightExclusive>>::Output;
 
                     #[inline]
                     fn get_at(&self) -> &#target_type {
@@ -255,6 +250,15 @@ pub fn generate_typed_tuple_impls(_input: TokenStream) -> TokenStream {
                     fn get_mut_at(&mut self) -> &mut #target_type {
                         &mut self.#index_lit
                     }
+                }
+                
+                impl<#(#type_params),*> TypedBounds<#index_marker, #target_type> for (#(#type_params,)*) {
+                    type PopOutput = <Self::SplitLeftExclusive as ChainRight<Self::SplitRightExclusive>>::Output;
+                    type SplitLeftExclusive = (#(#split_left_exclusive_types,)*);
+                    type SplitLeftInclusive = <Self::SplitLeftExclusive as ChainRight<(#target_type,)>>::Output;
+                    type SplitRightExclusive = (#(#split_right_exclusive_types,)*);
+                    type SplitRightInclusive = <(#target_type,) as ChainRight<Self::SplitRightExclusive>>::Output;
+
                     #[inline]
                     fn split_exclusive_at(self) -> (Self::SplitLeftExclusive, #target_type, Self::SplitRightExclusive) {
                         ((#(self.#split_left_exclusive_indices,)*), self.#index_lit, (#(self.#split_right_exclusive_indices,)*))

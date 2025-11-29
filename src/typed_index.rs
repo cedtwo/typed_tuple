@@ -2,41 +2,8 @@
 
 use crate::prelude::*;
 
-/// Trait for mapping an index (or indices) to a type (or types).
-pub trait TypedIndex<INDEX: TupleIndex, T>:
-    Sized + NthIndex<INDEX> + LastIndex<Last: TupleIndexSub<INDEX>> + NthIndexedUntil<INDEX>
-{
-    /// The type of the remaining tuple after popping element of type `T`.
-    type PopOutput;
-    /// The type of the left tuple when splitting exclusively (excludes element
-    /// at INDEX): [.., INDEX).
-    type SplitLeftExclusive: ChainRight<(T,), Output = Self::SplitLeftInclusive>
-        + ChainRight<Self::SplitRightExclusive, Output = Self::PopOutput>
-        + ChainRight<Self::SplitRightInclusive, Output = Self>;
-    /// The type of the left tuple when splitting inclusively (includes element
-    /// at INDEX): [.., INDEX].
-    type SplitLeftInclusive: NthIndexedAs<INDEX, Self>
-        + TypedUntil<INDEX>
-        + NthIndexedUntil<INDEX>
-        + TypedIndex<
-            INDEX,
-            T,
-            SplitLeftExclusive = Self::SplitLeftExclusive,
-            SplitRightInclusive = (T,),
-        > + ChainRight<Self::SplitRightExclusive, Output = Self>;
-    /// The type of the right tuple when splitting exclusively (excludes element
-    /// at INDEX): (INDEX, ..].
-    type SplitRightExclusive: ChainLeft<(T,), Output = Self::SplitRightInclusive>
-        + ChainLeft<Self::SplitLeftExclusive, Output = Self::PopOutput>
-        + ChainLeft<Self::SplitLeftInclusive, Output = Self>;
-    /// The type of the right tuple when splitting inclusively (includes element
-    /// at INDEX): [INDEX, ..].
-    type SplitRightInclusive: TypedIndex<
-            TupleIndex0,
-            T,
-            SplitRightExclusive = Self::SplitRightExclusive,
-            SplitLeftInclusive = (T,),
-        > + ChainLeft<Self::SplitLeftExclusive, Output = Self>;
+/// Trait for mapping an index to a type.
+pub trait TypedIndex<INDEX: TupleIndex, T> {
 
     /// Get a reference to the element of type `T`.
     /// # Example
@@ -73,6 +40,47 @@ pub trait TypedIndex<INDEX: TupleIndex, T>:
     /// assert_eq!(tuple, ("e", 'f', 4))
     /// ```
     fn get_mut_at(&mut self) -> &mut T;
+}
+
+/// Trait for mapping a range of indices to a range of types.
+pub trait TypedBounds<INDEX: TupleIndex, T>:
+    TypedIndex<INDEX, T>
+    + Sized
+    + NthIndex<INDEX>
+    + LastIndex<Last: TupleIndexSub<INDEX>>
+    + NthIndexedUntil<INDEX>
+{
+    /// The type of the remaining tuple after popping element of type `T`.
+    type PopOutput;
+    /// The type of the left tuple when splitting exclusively (excludes element
+    /// at INDEX): [.., INDEX).
+    type SplitLeftExclusive: ChainRight<(T,), Output = Self::SplitLeftInclusive>
+        + ChainRight<Self::SplitRightExclusive, Output = Self::PopOutput>
+        + ChainRight<Self::SplitRightInclusive, Output = Self>;
+    /// The type of the left tuple when splitting inclusively (includes element
+    /// at INDEX): [.., INDEX].
+    type SplitLeftInclusive: NthIndexedAs<INDEX, Self>
+        + TypedUntil<INDEX>
+        + NthIndexedUntil<INDEX>
+        + TypedBounds<
+            INDEX,
+            T,
+            SplitLeftExclusive = Self::SplitLeftExclusive,
+            SplitRightInclusive = (T,),
+        > + ChainRight<Self::SplitRightExclusive, Output = Self>;
+    /// The type of the right tuple when splitting exclusively (excludes element
+    /// at INDEX): (INDEX, ..].
+    type SplitRightExclusive: ChainLeft<(T,), Output = Self::SplitRightInclusive>
+        + ChainLeft<Self::SplitLeftExclusive, Output = Self::PopOutput>
+        + ChainLeft<Self::SplitLeftInclusive, Output = Self>;
+    /// The type of the right tuple when splitting inclusively (includes element
+    /// at INDEX): [INDEX, ..].
+    type SplitRightInclusive: TypedBounds<
+            TupleIndex0,
+            T,
+            SplitRightExclusive = Self::SplitRightExclusive,
+            SplitLeftInclusive = (T,),
+        > + ChainLeft<Self::SplitLeftExclusive, Output = Self>;
 
     /// Splits the tuple exclusively at INDEX, returning the element and the
     /// surrounding tuples.
@@ -89,7 +97,7 @@ pub trait TypedIndex<INDEX: TupleIndex, T>:
     /// ```rust
     /// # use typed_tuple::prelude::*;
     /// let tuple = (1u8, 2u16, 3u32, 4u64, 5i8);
-    /// let (left, element, right) = TypedIndex::<TupleIndex2, u32>::split_exclusive_at(tuple);
+    /// let (left, element, right) = TypedBounds::<TupleIndex2, u32>::split_exclusive_at(tuple);
     /// assert_eq!(left, (1u8, 2u16));
     /// assert_eq!(element, 3u32);
     /// assert_eq!(right, (4u64, 5i8));

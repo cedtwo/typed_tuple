@@ -25,7 +25,7 @@ use crate::prelude::*;
 /// ```
 pub trait TypedFirst<T>:
     NthIndex<TupleIndex0, NthType = T>
-    + TypedIndex<
+    + TypedBounds<
         TupleIndex0,
         T,
         SplitLeftInclusive = (T,),
@@ -37,7 +37,7 @@ pub trait TypedFirst<T>:
 
 impl<T, TT> TypedFirst<T> for TT where
     TT: NthIndex<TupleIndex0, NthType = T>
-        + TypedIndex<
+        + TypedBounds<
             TupleIndex0,
             T,
             SplitLeftInclusive = (T,),

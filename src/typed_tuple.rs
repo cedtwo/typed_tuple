@@ -1,6 +1,6 @@
 //! Submodule for TypedTuple extension traits.
 
-use crate::prelude::*;
+use crate::{prelude::*, typed_index::TypedBounds};
 
 /// Extension trait to add additional methods to TypedTuple.
 pub trait TypedTuple<T>: Sized {
@@ -79,10 +79,10 @@ pub trait TypedTuple<T>: Sized {
     #[inline]
     fn split_exclusive<INDEX>(self) -> (Self::SplitLeftExclusive, T, Self::SplitRightExclusive)
     where
-        Self: TypedIndex<INDEX, T>,
+        Self: TypedBounds<INDEX, T>,
         INDEX: TupleIndex,
     {
-        TypedIndex::<INDEX, T>::split_exclusive_at(self)
+        TypedBounds::<INDEX, T>::split_exclusive_at(self)
     }
 
     /// Replaces the element of type `T` with the provided value, returning the
@@ -224,7 +224,7 @@ pub trait TypedTuple<T>: Sized {
     /// ```
     fn pop<INDEX>(self) -> (T, Self::PopOutput)
     where
-        Self: TypedIndex<INDEX, T>,
+        Self: TypedBounds<INDEX, T>,
         INDEX: TupleIndex,
     {
         let (left, element, right) = self.split_exclusive();
@@ -308,7 +308,7 @@ pub trait TypedTuple<T>: Sized {
     /// ```
     fn split_left<INDEX>(self) -> (Self::SplitLeftInclusive, Self::SplitRightExclusive)
     where
-        Self: TypedIndex<INDEX, T>,
+        Self: TypedBounds<INDEX, T>,
         INDEX: TupleIndex,
     {
         let (left_exclusive, element, right_exclusive) = self.split_exclusive();
@@ -337,7 +337,7 @@ pub trait TypedTuple<T>: Sized {
     /// ```
     fn split_right<INDEX>(self) -> (Self::SplitLeftExclusive, Self::SplitRightInclusive)
     where
-        Self: TypedIndex<INDEX, T>,
+        Self: TypedBounds<INDEX, T>,
         INDEX: TupleIndex,
     {
         let (left_exclusive, element, right_exclusive) = self.split_exclusive();
@@ -366,7 +366,7 @@ pub trait TypedTuple<T>: Sized {
     /// ```
     fn split_inclusive<INDEX>(self) -> (Self::SplitLeftInclusive, Self::SplitRightInclusive)
     where
-        Self: TypedIndex<INDEX, T>,
+        Self: TypedBounds<INDEX, T>,
         INDEX: TupleIndex,
         T: Clone,
     {

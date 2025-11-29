@@ -26,7 +26,7 @@ pub mod prelude {
         tuple_index::TupleIndex,
         tuple_key::TupleKey,
         typed_first::TypedFirst,
-        typed_index::TypedIndex,
+        typed_index::{TypedIndex, TypedBounds},
         typed_last::TypedLast,
         typed_nth::TypedNth,
         typed_tuple::TypedTuple,
