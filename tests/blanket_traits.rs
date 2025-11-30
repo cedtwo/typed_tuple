@@ -50,7 +50,7 @@ trait ElementAt<Idx, T> {
 }
 
 // Blanket implementation for any tuple up to 128 elements that has T at the
-// specified INDEX
+// specified Idx
 impl<Idx, M, T> ElementAt<Idx, T> for M
 where
     Idx: TupleIndex,

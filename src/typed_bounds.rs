@@ -2,38 +2,38 @@
 use crate::prelude::*;
 
 /// Trait for mapping a range of indices to a range of types.
-pub trait TypedBounds<INDEX: TupleIndex, T>:
-    TypedIndex<INDEX, T>
+pub trait TypedBounds<Idx: TupleIndex, T>:
+    TypedIndex<Idx, T>
     + Sized
-    + NthIndex<INDEX>
-    + LastIndex<Last: TupleIndexSub<INDEX>>
-    + NthIndexedUntil<INDEX>
+    + NthIndex<Idx>
+    + LastIndex<Last: TupleIndexSub<Idx>>
+    + NthIndexedUntil<Idx>
 {
     /// The type of the remaining tuple after popping element of type `T`.
     type PopOutput;
     /// The type of the left tuple when splitting exclusively (excludes element
-    /// at INDEX): [.., INDEX).
+    /// at Idx): [.., Idx).
     type SplitLeftExclusive: ChainRight<(T,), Output = Self::SplitLeftInclusive>
         + ChainRight<Self::SplitRightExclusive, Output = Self::PopOutput>
         + ChainRight<Self::SplitRightInclusive, Output = Self>;
     /// The type of the left tuple when splitting inclusively (includes element
-    /// at INDEX): [.., INDEX].
-    type SplitLeftInclusive: NthIndexedAs<INDEX, Self>
-        + TypedUntil<INDEX>
-        + NthIndexedUntil<INDEX>
+    /// at Idx): [.., Idx].
+    type SplitLeftInclusive: NthIndexedAs<Idx, Self>
+        + TypedUntil<Idx>
+        + NthIndexedUntil<Idx>
         + TypedBounds<
-            INDEX,
+            Idx,
             T,
             SplitLeftExclusive = Self::SplitLeftExclusive,
             SplitRightInclusive = (T,),
         > + ChainRight<Self::SplitRightExclusive, Output = Self>;
     /// The type of the right tuple when splitting exclusively (excludes element
-    /// at INDEX): (INDEX, ..].
+    /// at Idx): (Idx, ..].
     type SplitRightExclusive: ChainLeft<(T,), Output = Self::SplitRightInclusive>
         + ChainLeft<Self::SplitLeftExclusive, Output = Self::PopOutput>
         + ChainLeft<Self::SplitLeftInclusive, Output = Self>;
     /// The type of the right tuple when splitting inclusively (includes element
-    /// at INDEX): [INDEX, ..].
+    /// at Idx): [Idx, ..].
     type SplitRightInclusive: TypedBounds<
             TupleIndex0,
             T,
@@ -41,15 +41,15 @@ pub trait TypedBounds<INDEX: TupleIndex, T>:
             SplitLeftInclusive = (T,),
         > + ChainLeft<Self::SplitLeftExclusive, Output = Self>;
 
-    /// Splits the tuple exclusively at INDEX, returning the element and the
+    /// Splits the tuple exclusively at Idx, returning the element and the
     /// surrounding tuples.
     ///
     /// # Returns
     ///
     /// A tuple containing (left_exclusive, element, right_exclusive) where:
-    /// - `left_exclusive` contains elements [0..INDEX)
-    /// - `element` is the element at INDEX
-    /// - `right_exclusive` contains elements (INDEX..)
+    /// - `left_exclusive` contains elements [0..Idx)
+    /// - `element` is the element at Idx
+    /// - `right_exclusive` contains elements (Idx..)
     ///
     /// # Example
     ///

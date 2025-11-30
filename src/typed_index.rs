@@ -3,7 +3,7 @@
 use crate::prelude::*;
 
 /// Trait for mapping an index to a type.
-pub trait TypedIndex<INDEX: TupleIndex, T> {
+pub trait TypedIndex<Idx: TupleIndex, T> {
     /// Get a reference to the element of type `T`.
     /// # Example
     /// ```

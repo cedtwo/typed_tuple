@@ -33,7 +33,7 @@ pub fn generate_index_markers(_input: TokenStream) -> TokenStream {
             pub struct #marker_ident;
 
             impl TupleIndex for #marker_ident {
-                const INDEX: usize = #index;
+                const Idx: usize = #index;
             }
         });
     }
@@ -299,7 +299,7 @@ pub fn define_tuple_index_trait(_input: TokenStream) -> TokenStream {
         /// Trait for tuple index types.
         pub trait TupleIndex: #(#bounds)+* {
             /// The associated index value.
-            const INDEX: usize;
+            const Idx: usize;
         }
     }
     .into()

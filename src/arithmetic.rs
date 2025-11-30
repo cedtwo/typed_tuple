@@ -14,11 +14,11 @@ use crate::prelude::*;
 /// # use typed_tuple::prelude::*;
 /// // TupleIndex2 + TupleIndex3 = TupleIndex5
 /// type Result = <TupleIndex2 as TupleIndexAdd<TupleIndex3>>::Output;
-/// assert_eq!(<Result as TupleIndex>::INDEX, 5);
+/// assert_eq!(<Result as TupleIndex>::Idx, 5);
 ///
 /// // TupleIndex0 + TupleIndex10 = TupleIndex10
 /// type Result2 = <TupleIndex0 as TupleIndexAdd<TupleIndex10>>::Output;
-/// assert_eq!(<Result2 as TupleIndex>::INDEX, 10);
+/// assert_eq!(<Result2 as TupleIndex>::Idx, 10);
 /// ```
 pub trait TupleIndexAdd<Other> {
     /// The resulting tuple index type after addition.
@@ -37,11 +37,11 @@ pub trait TupleIndexAdd<Other> {
 /// # use typed_tuple::prelude::*;
 /// // TupleIndex5 - TupleIndex2 = TupleIndex3
 /// type Result = <TupleIndex5 as TupleIndexSub<TupleIndex2>>::Output;
-/// assert_eq!(<Result as TupleIndex>::INDEX, 3);
+/// assert_eq!(<Result as TupleIndex>::Idx, 3);
 ///
 /// // TupleIndex10 - TupleIndex10 = TupleIndex0
 /// type Result2 = <TupleIndex10 as TupleIndexSub<TupleIndex10>>::Output;
-/// assert_eq!(<Result2 as TupleIndex>::INDEX, 0);
+/// assert_eq!(<Result2 as TupleIndex>::Idx, 0);
 /// ```
 pub trait TupleIndexSub<Other> {
     /// The resulting tuple index type after subtraction.
@@ -61,11 +61,11 @@ pub trait TupleIndexSub<Other> {
 /// # use typed_tuple::prelude::*;
 /// // TupleIndex5 - TupleIndex2 = TupleIndex3
 /// type Result = <TupleIndex5 as TupleIndexSaturatingSub<TupleIndex2>>::Output;
-/// assert_eq!(<Result as TupleIndex>::INDEX, 3);
+/// assert_eq!(<Result as TupleIndex>::Idx, 3);
 ///
 /// // TupleIndex2 - TupleIndex10 = TupleIndex0 (saturates at 0)
 /// type Result2 = <TupleIndex2 as TupleIndexSaturatingSub<TupleIndex10>>::Output;
-/// assert_eq!(<Result2 as TupleIndex>::INDEX, 0);
+/// assert_eq!(<Result2 as TupleIndex>::Idx, 0);
 /// ```
 pub trait TupleIndexSaturatingSub<Other> {
     /// The resulting tuple index type after saturating subtraction.

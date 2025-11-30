@@ -21,12 +21,12 @@ pub trait TypedTuple<T>: Sized {
     /// assert_eq!((a, b, c), (&"a", &'b', &2));
     /// ```
     #[inline]
-    fn get<INDEX>(&self) -> &T
+    fn get<Idx>(&self) -> &T
     where
-        Self: TypedIndex<INDEX, T>,
-        INDEX: TupleIndex,
+        Self: TypedIndex<Idx, T>,
+        Idx: TupleIndex,
     {
-        TypedIndex::<INDEX, T>::get_at(self)
+        TypedIndex::<Idx, T>::get_at(self)
     }
 
     /// Get a mutable reference to the element of type `T`.
@@ -47,23 +47,23 @@ pub trait TypedTuple<T>: Sized {
     /// assert_eq!(tuple, ("e", 'f', 4))
     /// ```
     #[inline]
-    fn get_mut<INDEX>(&mut self) -> &mut T
+    fn get_mut<Idx>(&mut self) -> &mut T
     where
-        Self: TypedIndex<INDEX, T>,
-        INDEX: TupleIndex,
+        Self: TypedIndex<Idx, T>,
+        Idx: TupleIndex,
     {
-        TypedIndex::<INDEX, T>::get_mut_at(self)
+        TypedIndex::<Idx, T>::get_mut_at(self)
     }
 
-    /// Splits the tuple exclusively at INDEX, returning the element and the
+    /// Splits the tuple exclusively at Idx, returning the element and the
     /// surrounding tuples.
     ///
     /// # Returns
     ///
     /// A tuple containing (left_exclusive, element, right_exclusive) where:
-    /// - `left_exclusive` contains elements [0..INDEX)
-    /// - `element` is the element at INDEX
-    /// - `right_exclusive` contains elements (INDEX..)
+    /// - `left_exclusive` contains elements [0..Idx)
+    /// - `element` is the element at Idx
+    /// - `right_exclusive` contains elements (Idx..)
     ///
     /// # Example
     ///
@@ -76,12 +76,12 @@ pub trait TypedTuple<T>: Sized {
     /// assert_eq!(right, (4u64, 5i8));
     /// ```
     #[inline]
-    fn split_exclusive<INDEX>(self) -> (Self::SplitLeftExclusive, T, Self::SplitRightExclusive)
+    fn split_exclusive<Idx>(self) -> (Self::SplitLeftExclusive, T, Self::SplitRightExclusive)
     where
-        Self: TypedBounds<INDEX, T>,
-        INDEX: TupleIndex,
+        Self: TypedBounds<Idx, T>,
+        Idx: TupleIndex,
     {
-        TypedBounds::<INDEX, T>::split_exclusive_at(self)
+        TypedBounds::<Idx, T>::split_exclusive_at(self)
     }
 
     /// Replaces the element of type `T` with the provided value, returning the
@@ -105,12 +105,12 @@ pub trait TypedTuple<T>: Sized {
     /// assert_eq!(tuple, (30u32, 20u64));
     /// ```
     #[inline]
-    fn replace<INDEX>(&mut self, value: T) -> T
+    fn replace<Idx>(&mut self, value: T) -> T
     where
-        Self: TypedIndex<INDEX, T>,
-        INDEX: TupleIndex,
+        Self: TypedIndex<Idx, T>,
+        Idx: TupleIndex,
     {
-        core::mem::replace(self.get_mut::<INDEX>(), value)
+        core::mem::replace(self.get_mut::<Idx>(), value)
     }
 
     /// Takes a closure, mutating the element of type `T`.
@@ -130,10 +130,10 @@ pub trait TypedTuple<T>: Sized {
     /// tuple.apply::<TupleIndex2, _>(|el| *el -= 2);
     /// assert_eq!(tuple, ("a".to_string(), 1, 2))
     /// ```
-    fn apply<INDEX, FN: FnOnce(&mut T)>(&mut self, f: FN)
+    fn apply<Idx, FN: FnOnce(&mut T)>(&mut self, f: FN)
     where
-        Self: TypedIndex<INDEX, T>,
-        INDEX: TupleIndex,
+        Self: TypedIndex<Idx, T>,
+        Idx: TupleIndex,
     {
         f(self.get_mut());
     }
@@ -154,10 +154,10 @@ pub trait TypedTuple<T>: Sized {
     /// let result = tuple.map::<TupleIndex1, _, _>(|x| x + 5);
     /// assert_eq!(result, 25u64);
     /// ```
-    fn map<INDEX, FN, R>(&self, f: FN) -> R
+    fn map<Idx, FN, R>(&self, f: FN) -> R
     where
-        Self: TypedIndex<INDEX, T>,
-        INDEX: TupleIndex,
+        Self: TypedIndex<Idx, T>,
+        Idx: TupleIndex,
         FN: FnOnce(&T) -> R,
     {
         f(self.get())
@@ -188,10 +188,10 @@ pub trait TypedTuple<T>: Sized {
     /// assert_eq!(result, 40u64);
     /// assert_eq!(tuple, (15u32, 40u64));
     /// ```
-    fn map_mut<INDEX, FN, R>(&mut self, f: FN) -> R
+    fn map_mut<Idx, FN, R>(&mut self, f: FN) -> R
     where
-        Self: TypedIndex<INDEX, T>,
-        INDEX: TupleIndex,
+        Self: TypedIndex<Idx, T>,
+        Idx: TupleIndex,
         FN: FnOnce(&mut T) -> R,
     {
         f(self.get_mut())
@@ -221,18 +221,18 @@ pub trait TypedTuple<T>: Sized {
     /// assert_eq!(c, 'b');
     /// assert_eq!(rest, ("a", 2usize));
     /// ```
-    fn pop<INDEX>(self) -> (T, Self::PopOutput)
+    fn pop<Idx>(self) -> (T, Self::PopOutput)
     where
-        Self: TypedBounds<INDEX, T>,
-        INDEX: TupleIndex,
+        Self: TypedBounds<Idx, T>,
+        Idx: TupleIndex,
     {
         let (left, element, right) = self.split_exclusive();
         (element, left.chain_right(right))
     }
 
-    /// Swaps the element at INDEX with the element at OTHER.
+    /// Swaps the element at `Idx` with the element at `Other`.
     ///
-    /// Both indices must contain elements of type `T`. If INDEX == OTHER,
+    /// Both indices must contain elements of type `T`. If `Idx` == `Other`,
     /// this is a no-op.
     ///
     /// # Example
@@ -244,17 +244,17 @@ pub trait TypedTuple<T>: Sized {
     /// assert_eq!(tuple, (2u32, "hello", 1u32, 'x', 3u32));
     /// ```
     #[inline]
-    fn swap<INDEX, OTHER>(&mut self)
+    fn swap<Idx, Other>(&mut self)
     where
-        Self: TypedIndex<INDEX, T> + TypedIndex<OTHER, T>,
-        INDEX: TupleIndex,
-        OTHER: TupleIndex,
+        Self: TypedIndex<Idx, T> + TypedIndex<Other, T>,
+        Idx: TupleIndex,
+        Other: TupleIndex,
     {
-        if INDEX::INDEX != OTHER::INDEX {
+        if Idx::Idx != Other::Idx {
             unsafe {
                 let ptr = self as *mut Self;
-                let field1 = (&mut *ptr).get_mut::<INDEX>();
-                let field2 = (&mut *ptr).get_mut::<OTHER>();
+                let field1 = (&mut *ptr).get_mut::<Idx>();
+                let field2 = (&mut *ptr).get_mut::<Other>();
                 core::mem::swap(field1, field2);
             }
         }
@@ -276,25 +276,25 @@ pub trait TypedTuple<T>: Sized {
     /// assert_eq!(tuple, (String::new(), 42, 3.14));
     /// ```
     #[inline]
-    fn take<INDEX>(&mut self) -> T
+    fn take<Idx>(&mut self) -> T
     where
-        Self: TypedIndex<INDEX, T>,
-        INDEX: TupleIndex,
+        Self: TypedIndex<Idx, T>,
+        Idx: TupleIndex,
         T: Default,
     {
         core::mem::take(self.get_mut())
     }
 
     #[inline]
-    /// Splits the tuple at INDEX (inclusive left), returning two tuples.
+    /// Splits the tuple at Idx (inclusive left), returning two tuples.
     ///
-    /// The element at INDEX is included in the left tuple.
+    /// The element at Idx is included in the left tuple.
     ///
     /// # Returns
     ///
     /// A tuple containing (left_inclusive, right_exclusive) where:
-    /// - `left_inclusive` contains elements [0..=INDEX]
-    /// - `right_exclusive` contains elements (INDEX..)
+    /// - `left_inclusive` contains elements [0..=Idx]
+    /// - `right_exclusive` contains elements (Idx..)
     ///
     /// # Example
     ///
@@ -305,25 +305,25 @@ pub trait TypedTuple<T>: Sized {
     /// assert_eq!(left, (1u8, 2u16, 3u32));
     /// assert_eq!(right, (4u64, 5i8));
     /// ```
-    fn split_left<INDEX>(self) -> (Self::SplitLeftInclusive, Self::SplitRightExclusive)
+    fn split_left<Idx>(self) -> (Self::SplitLeftInclusive, Self::SplitRightExclusive)
     where
-        Self: TypedBounds<INDEX, T>,
-        INDEX: TupleIndex,
+        Self: TypedBounds<Idx, T>,
+        Idx: TupleIndex,
     {
         let (left_exclusive, element, right_exclusive) = self.split_exclusive();
         (left_exclusive.chain_right((element,)), right_exclusive)
     }
 
     #[inline]
-    /// Splits the tuple at INDEX (inclusive right), returning two tuples.
+    /// Splits the tuple at Idx (inclusive right), returning two tuples.
     ///
-    /// The element at INDEX is included in the right tuple.
+    /// The element at Idx is included in the right tuple.
     ///
     /// # Returns
     ///
     /// A tuple containing (left_exclusive, right_inclusive) where:
-    /// - `left_exclusive` contains elements [0..INDEX)
-    /// - `right_inclusive` contains elements [INDEX..]
+    /// - `left_exclusive` contains elements [0..Idx)
+    /// - `right_inclusive` contains elements [Idx..]
     ///
     /// # Example
     ///
@@ -334,25 +334,25 @@ pub trait TypedTuple<T>: Sized {
     /// assert_eq!(left, (1u8, 2u16));
     /// assert_eq!(right, (3u32, 4u64, 5i8));
     /// ```
-    fn split_right<INDEX>(self) -> (Self::SplitLeftExclusive, Self::SplitRightInclusive)
+    fn split_right<Idx>(self) -> (Self::SplitLeftExclusive, Self::SplitRightInclusive)
     where
-        Self: TypedBounds<INDEX, T>,
-        INDEX: TupleIndex,
+        Self: TypedBounds<Idx, T>,
+        Idx: TupleIndex,
     {
         let (left_exclusive, element, right_exclusive) = self.split_exclusive();
         (left_exclusive, right_exclusive.chain_left((element,)))
     }
 
     #[inline]
-    /// Splits the tuple at INDEX (inclusive both sides), returning two tuples.
+    /// Splits the tuple at Idx (inclusive both sides), returning two tuples.
     ///
-    /// The element at INDEX is cloned and included in both tuples.
+    /// The element at Idx is cloned and included in both tuples.
     ///
     /// # Returns
     ///
     /// A tuple containing (left_inclusive, right_inclusive) where:
-    /// - `left_inclusive` contains elements [0..=INDEX]
-    /// - `right_inclusive` contains elements [INDEX..]
+    /// - `left_inclusive` contains elements [0..=Idx]
+    /// - `right_inclusive` contains elements [Idx..]
     ///
     /// # Example
     ///
@@ -363,10 +363,10 @@ pub trait TypedTuple<T>: Sized {
     /// assert_eq!(left, (1u8, 2u16, 3u32));
     /// assert_eq!(right, (3u32, 4u64, 5i8));
     /// ```
-    fn split_inclusive<INDEX>(self) -> (Self::SplitLeftInclusive, Self::SplitRightInclusive)
+    fn split_inclusive<Idx>(self) -> (Self::SplitLeftInclusive, Self::SplitRightInclusive)
     where
-        Self: TypedBounds<INDEX, T>,
-        INDEX: TupleIndex,
+        Self: TypedBounds<Idx, T>,
+        Idx: TupleIndex,
         T: Clone,
     {
         let (left_exclusive, element, right_exclusive) = self.split_exclusive();
