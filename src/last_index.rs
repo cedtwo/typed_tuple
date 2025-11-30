@@ -31,5 +31,5 @@ use crate::prelude::*;
 /// ```
 pub trait LastIndex: NthIndex<Self::Last> {
     /// The index marker type for the last element of this tuple.
-    type Last: TupleIndex;
+    type Last: typenum::Unsigned;
 }

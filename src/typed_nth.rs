@@ -4,12 +4,12 @@
 use crate::prelude::*;
 
 /// Trait for accessing the nth element of a tuple by index.
-pub trait TypedNth<Idx: TupleIndex>:
+pub trait TypedNth<Idx: typenum::Unsigned>:
     NthIndex<Idx> + TypedIndex<Idx, <Self as NthIndex<Idx>>::NthType>
 {
 }
 
-impl<Idx: TupleIndex, TT> TypedNth<Idx> for TT where
+impl<Idx: typenum::Unsigned, TT> TypedNth<Idx> for TT where
     TT: NthIndex<Idx> + TypedIndex<Idx, <TT as NthIndex<Idx>>::NthType>
 {
 }

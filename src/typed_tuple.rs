@@ -15,16 +15,16 @@ pub trait TypedTuple<T>: Sized {
     /// assert_eq!((a, b, c), (&"a", &'b', &2));
     ///
     /// // Get by index.
-    /// let a = tuple.get::<TupleIndex0>();
-    /// let b = tuple.get::<TupleIndex1>();
-    /// let c = tuple.get::<TupleIndex2>();
+    /// let a = tuple.get::<typenum::U0>();
+    /// let b = tuple.get::<typenum::U1>();
+    /// let c = tuple.get::<typenum::U2>();
     /// assert_eq!((a, b, c), (&"a", &'b', &2));
     /// ```
     #[inline]
     fn get<Idx>(&self) -> &T
     where
         Self: TypedIndex<Idx, T>,
-        Idx: TupleIndex,
+        Idx: typenum::Unsigned,
     {
         TypedIndex::<Idx, T>::get_at(self)
     }
@@ -41,16 +41,16 @@ pub trait TypedTuple<T>: Sized {
     /// assert_eq!(tuple, ("c", 'd', 3));
     ///
     /// // Mutate by index.
-    /// *tuple.get_mut::<TupleIndex0>() = "e";
-    /// *tuple.get_mut::<TupleIndex1>() = 'f';
-    /// *tuple.get_mut::<TupleIndex2>() = 4usize;
+    /// *tuple.get_mut::<typenum::U0>() = "e";
+    /// *tuple.get_mut::<typenum::U1>() = 'f';
+    /// *tuple.get_mut::<typenum::U2>() = 4usize;
     /// assert_eq!(tuple, ("e", 'f', 4))
     /// ```
     #[inline]
     fn get_mut<Idx>(&mut self) -> &mut T
     where
         Self: TypedIndex<Idx, T>,
-        Idx: TupleIndex,
+        Idx: typenum::Unsigned,
     {
         TypedIndex::<Idx, T>::get_mut_at(self)
     }
@@ -70,7 +70,7 @@ pub trait TypedTuple<T>: Sized {
     /// ```rust
     /// # use typed_tuple::prelude::*;
     /// let tuple = (1u8, 2u16, 3u32, 4u64, 5i8);
-    /// let (left, element, right) = tuple.split_exclusive::<TupleIndex2>();
+    /// let (left, element, right) = tuple.split_exclusive::<typenum::U2>();
     /// assert_eq!(left, (1u8, 2u16));
     /// assert_eq!(element, 3u32);
     /// assert_eq!(right, (4u64, 5i8));
@@ -79,7 +79,7 @@ pub trait TypedTuple<T>: Sized {
     fn split_exclusive<Idx>(self) -> (Self::SplitLeftExclusive, T, Self::SplitRightExclusive)
     where
         Self: TypedBounds<Idx, T>,
-        Idx: TupleIndex,
+        Idx: typenum::Unsigned,
     {
         TypedBounds::<Idx, T>::split_exclusive_at(self)
     }
@@ -108,7 +108,7 @@ pub trait TypedTuple<T>: Sized {
     fn replace<Idx>(&mut self, value: T) -> T
     where
         Self: TypedIndex<Idx, T>,
-        Idx: TupleIndex,
+        Idx: typenum::Unsigned,
     {
         core::mem::replace(self.get_mut::<Idx>(), value)
     }
@@ -125,15 +125,15 @@ pub trait TypedTuple<T>: Sized {
     /// assert_eq!(tuple, ("A".to_string(), 2, 4));
     ///
     /// // Apply by index.
-    /// tuple.apply::<TupleIndex0, _>(|el| *el = el.to_lowercase());
-    /// tuple.apply::<TupleIndex1, _>(|el| *el -= 1);
-    /// tuple.apply::<TupleIndex2, _>(|el| *el -= 2);
+    /// tuple.apply::<typenum::U0, _>(|el| *el = el.to_lowercase());
+    /// tuple.apply::<typenum::U1, _>(|el| *el -= 1);
+    /// tuple.apply::<typenum::U2, _>(|el| *el -= 2);
     /// assert_eq!(tuple, ("a".to_string(), 1, 2))
     /// ```
     fn apply<Idx, FN: FnOnce(&mut T)>(&mut self, f: FN)
     where
         Self: TypedIndex<Idx, T>,
-        Idx: TupleIndex,
+        Idx: typenum::Unsigned,
     {
         f(self.get_mut());
     }
@@ -151,13 +151,13 @@ pub trait TypedTuple<T>: Sized {
     /// assert_eq!(result, 20u32);
     ///
     /// // Map by index.
-    /// let result = tuple.map::<TupleIndex1, _, _>(|x| x + 5);
+    /// let result = tuple.map::<typenum::U1, _, _>(|x| x + 5);
     /// assert_eq!(result, 25u64);
     /// ```
     fn map<Idx, FN, R>(&self, f: FN) -> R
     where
         Self: TypedIndex<Idx, T>,
-        Idx: TupleIndex,
+        Idx: typenum::Unsigned,
         FN: FnOnce(&T) -> R,
     {
         f(self.get())
@@ -181,7 +181,7 @@ pub trait TypedTuple<T>: Sized {
     /// assert_eq!(tuple, (15u32, 20u64));
     ///
     /// // Map by index.
-    /// let result = tuple.map_mut::<TupleIndex1, _, _>(|x| {
+    /// let result = tuple.map_mut::<typenum::U1, _, _>(|x| {
     ///     *x *= 2;
     ///     *x
     /// });
@@ -191,7 +191,7 @@ pub trait TypedTuple<T>: Sized {
     fn map_mut<Idx, FN, R>(&mut self, f: FN) -> R
     where
         Self: TypedIndex<Idx, T>,
-        Idx: TupleIndex,
+        Idx: typenum::Unsigned,
         FN: FnOnce(&mut T) -> R,
     {
         f(self.get_mut())
@@ -217,14 +217,14 @@ pub trait TypedTuple<T>: Sized {
     ///
     /// // Pop by index.
     /// let tuple = ("a", 'b', 2usize);
-    /// let (c, rest) = tuple.pop::<TupleIndex1>();
+    /// let (c, rest) = tuple.pop::<typenum::U1>();
     /// assert_eq!(c, 'b');
     /// assert_eq!(rest, ("a", 2usize));
     /// ```
     fn pop<Idx>(self) -> (T, Self::PopOutput)
     where
         Self: TypedBounds<Idx, T>,
-        Idx: TupleIndex,
+        Idx: typenum::Unsigned,
     {
         let (left, element, right) = self.split_exclusive();
         (element, left.chain_right(right))
@@ -240,17 +240,17 @@ pub trait TypedTuple<T>: Sized {
     /// ```rust
     /// # use typed_tuple::prelude::*;
     /// let mut tuple = (1u32, "hello", 2u32, 'x', 3u32);
-    /// tuple.swap::<TupleIndex0, TupleIndex2>();
+    /// tuple.swap::<typenum::U0, typenum::U2>();
     /// assert_eq!(tuple, (2u32, "hello", 1u32, 'x', 3u32));
     /// ```
     #[inline]
     fn swap<Idx, Other>(&mut self)
     where
         Self: TypedIndex<Idx, T> + TypedIndex<Other, T>,
-        Idx: TupleIndex,
-        Other: TupleIndex,
+        Idx: typenum::Unsigned,
+        Other: typenum::Unsigned,
     {
-        if Idx::Idx != Other::Idx {
+        if Idx::USIZE != Other::USIZE {
             unsafe {
                 let ptr = self as *mut Self;
                 let field1 = (&mut *ptr).get_mut::<Idx>();
@@ -279,7 +279,7 @@ pub trait TypedTuple<T>: Sized {
     fn take<Idx>(&mut self) -> T
     where
         Self: TypedIndex<Idx, T>,
-        Idx: TupleIndex,
+        Idx: typenum::Unsigned,
         T: Default,
     {
         core::mem::take(self.get_mut())
@@ -301,14 +301,14 @@ pub trait TypedTuple<T>: Sized {
     /// ```rust
     /// # use typed_tuple::prelude::*;
     /// let tuple = (1u8, 2u16, 3u32, 4u64, 5i8);
-    /// let (left, right) = tuple.split_left::<TupleIndex2>();
+    /// let (left, right) = tuple.split_left::<typenum::U2>();
     /// assert_eq!(left, (1u8, 2u16, 3u32));
     /// assert_eq!(right, (4u64, 5i8));
     /// ```
     fn split_left<Idx>(self) -> (Self::SplitLeftInclusive, Self::SplitRightExclusive)
     where
         Self: TypedBounds<Idx, T>,
-        Idx: TupleIndex,
+        Idx: typenum::Unsigned,
     {
         let (left_exclusive, element, right_exclusive) = self.split_exclusive();
         (left_exclusive.chain_right((element,)), right_exclusive)
@@ -330,14 +330,14 @@ pub trait TypedTuple<T>: Sized {
     /// ```rust
     /// # use typed_tuple::prelude::*;
     /// let tuple = (1u8, 2u16, 3u32, 4u64, 5i8);
-    /// let (left, right) = tuple.split_right::<TupleIndex2>();
+    /// let (left, right) = tuple.split_right::<typenum::U2>();
     /// assert_eq!(left, (1u8, 2u16));
     /// assert_eq!(right, (3u32, 4u64, 5i8));
     /// ```
     fn split_right<Idx>(self) -> (Self::SplitLeftExclusive, Self::SplitRightInclusive)
     where
         Self: TypedBounds<Idx, T>,
-        Idx: TupleIndex,
+        Idx: typenum::Unsigned,
     {
         let (left_exclusive, element, right_exclusive) = self.split_exclusive();
         (left_exclusive, right_exclusive.chain_left((element,)))
@@ -359,14 +359,14 @@ pub trait TypedTuple<T>: Sized {
     /// ```rust
     /// # use typed_tuple::prelude::*;
     /// let tuple = (1u8, 2u16, 3u32, 4u64, 5i8);
-    /// let (left, right) = tuple.split_inclusive::<TupleIndex2>();
+    /// let (left, right) = tuple.split_inclusive::<typenum::U2>();
     /// assert_eq!(left, (1u8, 2u16, 3u32));
     /// assert_eq!(right, (3u32, 4u64, 5i8));
     /// ```
     fn split_inclusive<Idx>(self) -> (Self::SplitLeftInclusive, Self::SplitRightInclusive)
     where
         Self: TypedBounds<Idx, T>,
-        Idx: TupleIndex,
+        Idx: typenum::Unsigned,
         T: Clone,
     {
         let (left_exclusive, element, right_exclusive) = self.split_exclusive();

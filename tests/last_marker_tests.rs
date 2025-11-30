@@ -203,7 +203,7 @@ fn test_last_index_trait() {
     type TupleType = (u8, u16, u32);
     type LastMarker = <TupleType as LastIndex>::Last;
 
-    // The Last associated type should be TupleIndex2 for a 3-element tuple
+    // The Last associated type should be typenum::U2 for a 3-element tuple
     let tuple: TupleType = (1, 2, 3);
     let last: &u32 = tuple.get::<LastMarker>();
     assert_eq!(*last, 3u32);
@@ -218,6 +218,6 @@ fn test_last_swap() {
     let mut tuple: TupleType = (1, 2, 3);
 
     // Swap first and last u32
-    tuple.swap::<TupleIndex0, LastIdx>();
+    tuple.swap::<typenum::U0, LastIdx>();
     assert_eq!(tuple, (3u32, 2u32, 1u32));
 }

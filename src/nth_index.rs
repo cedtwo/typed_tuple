@@ -1,7 +1,5 @@
 //! Sub-module for tuple index related traits.
 
-use crate::prelude::*;
-
 /// Trait to identify the type at a specific index of a tuple.
 ///
 /// This trait is implemented for all tuple types (by default up to size 64,
@@ -14,18 +12,18 @@ use crate::prelude::*;
 /// # use typed_tuple::prelude::*;
 /// // Get the type at index 1
 /// type MyTuple = (u8, u16, u32);
-/// type SecondType = <MyTuple as NthIndex<TupleIndex1>>::NthType;
+/// type SecondType = <MyTuple as NthIndex<typenum::U1>>::NthType;
 ///
 /// let tuple: MyTuple = (1, 2, 3);
-/// let second: &SecondType = tuple.get::<TupleIndex1>();
+/// let second: &SecondType = tuple.get::<typenum::U1>();
 /// assert_eq!(*second, 2u16);
 ///
 /// // Works with different indices
-/// type ThirdType = <MyTuple as NthIndex<TupleIndex2>>::NthType;
-/// let third: &ThirdType = tuple.get::<TupleIndex2>();
+/// type ThirdType = <MyTuple as NthIndex<typenum::U2>>::NthType;
+/// let third: &ThirdType = tuple.get::<typenum::U2>();
 /// assert_eq!(*third, 3u32);
 /// ```
-pub trait NthIndex<Idx: TupleIndex> {
+pub trait NthIndex<Idx: typenum::Unsigned> {
     /// The type of the element at index `Idx` in the tuple.
     type NthType;
 }

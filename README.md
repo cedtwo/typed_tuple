@@ -51,25 +51,25 @@ assert_eq!(rest, (1u8, 2u16, 4u64));
 
 // Swap elements at different indices (same type)
 let mut tuple = (1u32, "hello", 2u32, 'x', 3u32);
-tuple.swap::<TupleIndex0, TupleIndex2>();
+tuple.swap::<typenum::U0, typenum::U2>();
 assert_eq!(tuple, (2u32, "hello", 1u32, 'x', 3u32));
 
 // Split tuple exclusively (element separated)
 let tuple = (1u8, 2u16, 3u32, 4u64, 5i8);
-let (left, element, right) = tuple.split_exclusive::<TupleIndex2>();
+let (left, element, right) = tuple.split_exclusive::<typenum::U2>();
 assert_eq!(left, (1u8, 2u16));
 assert_eq!(element, 3u32);
 assert_eq!(right, (4u64, 5i8));
 
 // Split tuple with element on left
 let tuple = (1u8, 2u16, 3u32, 4u64, 5i8);
-let (left, right) = tuple.split_left::<TupleIndex2>();
+let (left, right) = tuple.split_left::<typenum::U2>();
 assert_eq!(left, (1u8, 2u16, 3u32));
 assert_eq!(right, (4u64, 5i8));
 
 // Split tuple with element on right
 let tuple = (1u8, 2u16, 3u32, 4u64, 5i8);
-let (left, right) = tuple.split_right::<TupleIndex2>();
+let (left, right) = tuple.split_right::<typenum::U2>();
 assert_eq!(left, (1u8, 2u16));
 assert_eq!(right, (3u32, 4u64, 5i8));
 
@@ -148,15 +148,15 @@ where
 
 // Map the marker to different indices for different tuple structures
 impl TupleKey<(u8, f64, &str)> for AgeMarker {
-    type Idx = TupleIndex0;
+    type Idx = typenum::U0;
 }
 
 impl TupleKey<(&str, f64, u8)> for AgeMarker {
-    type Idx = TupleIndex2;
+    type Idx = typenum::U2;
 }
 
 impl TupleKey<(&str, u8, f64)> for AgeMarker {
-    type Idx = TupleIndex1;
+    type Idx = typenum::U1;
 }
 
 // Now you can call .age() on different tuple structures
@@ -167,7 +167,7 @@ assert_eq!(("Charlie", 56u8, 1.8).age(), 56u8);
 
 ## Limitations
 
-- Fields of the same type must still specify an index type. This can be specified with, for example, `TypedTuple::<TupleIndex1, _>::get(&tuple)` where `TupleIndex1` is the element index type, however this offers no advantage over simply calling `tuple.1`.
+- Fields of the same type must still specify an index type. This can be specified with, for example, `TypedTuple::<typenum::U1, _>::get(&tuple)` where `typenum::U1` is the element index type, however this offers no advantage over simply calling `tuple.1`.
 - `typed_tuple` can impact readability. Types should be explicit if not immediately obvious. Prefer `let a: usize = tuple.get()` over `let a = tuple.get()`.
 
 ## Features

@@ -24,9 +24,9 @@ use crate::prelude::*;
 /// assert_eq!(*get_first(&tuple2), 42u32);
 /// ```
 pub trait TypedFirst<T>:
-    NthIndex<TupleIndex0, NthType = T>
+    NthIndex<typenum::U0, NthType = T>
     + TypedBounds<
-        TupleIndex0,
+        typenum::U0,
         T,
         SplitLeftInclusive = (T,),
         SplitLeftExclusive = (),
@@ -36,9 +36,9 @@ pub trait TypedFirst<T>:
 }
 
 impl<T, TT> TypedFirst<T> for TT where
-    TT: NthIndex<TupleIndex0, NthType = T>
+    TT: NthIndex<typenum::U0, NthType = T>
         + TypedBounds<
-            TupleIndex0,
+            typenum::U0,
             T,
             SplitLeftInclusive = (T,),
             SplitLeftExclusive = (),

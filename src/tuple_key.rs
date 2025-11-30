@@ -1,8 +1,6 @@
 //! Submodule defining the `TupleKey` trait for associating marker types with
 //! tuple indices.
 
-use crate::prelude::*;
-
 /// Helper trait to associate a marker type with a tuple index.
 ///
 /// This trait can be used to define blanket implementations that work with
@@ -36,19 +34,19 @@ use crate::prelude::*;
 /// }
 ///
 /// impl TupleKey<(u8, f64, &str)> for AgeMarker {
-///     type Idx = TupleIndex0;
+///     type Idx = typenum::U0;
 /// }
 ///
 /// impl TupleKey<(u8, &str, f64)> for AgeMarker {
-///     type Idx = TupleIndex0;
+///     type Idx = typenum::U0;
 /// }
 ///
 /// impl TupleKey<(&str, f64, u8, bool)> for AgeMarker {
-///     type Idx = TupleIndex2;
+///     type Idx = typenum::U2;
 /// }
 ///
 /// impl TupleKey<(&str, u8, f64)> for AgeMarker {
-///     type Idx = TupleIndex1;
+///     type Idx = typenum::U1;
 /// }
 ///
 /// assert_eq!((67u8, "Alice", 3.5f64).age(), 67u8);
@@ -58,5 +56,5 @@ use crate::prelude::*;
 /// ```
 pub trait TupleKey<Marker> {
     /// The index of the element associated with the marker type.
-    type Idx: TupleIndex;
+    type Idx: typenum::Unsigned;
 }

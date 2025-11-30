@@ -25,7 +25,6 @@ use crate::prelude::*;
 /// ```
 pub trait TypedLast<T>:
     LastIndex<NthType = T>
-    + TypedUntil<<Self as LastIndex>::Last>
     + TypedBounds<
         <Self as LastIndex>::Last,
         T,
@@ -38,7 +37,6 @@ pub trait TypedLast<T>:
 
 impl<T, TT> TypedLast<T> for TT where
     TT: LastIndex<NthType = T>
-        + TypedUntil<<TT as LastIndex>::Last>
         + TypedBounds<
             <TT as LastIndex>::Last,
             T,

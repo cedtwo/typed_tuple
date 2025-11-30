@@ -1,9 +1,7 @@
 //! Sub-module for type/index mapping.
 
-use crate::prelude::*;
-
 /// Trait for mapping an index to a type.
-pub trait TypedIndex<Idx: TupleIndex, T> {
+pub trait TypedIndex<Idx: typenum::Unsigned, T> {
     /// Get a reference to the element of type `T`.
     /// # Example
     /// ```
@@ -15,9 +13,9 @@ pub trait TypedIndex<Idx: TupleIndex, T> {
     /// let c: &usize = tuple.get_at();
     ///
     /// // Get by 'const' index.
-    /// let a = TypedIndex::<TupleIndex0, _>::get_at(&tuple);
-    /// let b = TypedIndex::<TupleIndex1, _>::get_at(&tuple);
-    /// let c = TypedIndex::<TupleIndex2, _>::get_at(&tuple);
+    /// let a = TypedIndex::<typenum::U0, _>::get_at(&tuple);
+    /// let b = TypedIndex::<typenum::U1, _>::get_at(&tuple);
+    /// let c = TypedIndex::<typenum::U2, _>::get_at(&tuple);
     /// ```
     fn get_at(&self) -> &T;
 
@@ -33,9 +31,9 @@ pub trait TypedIndex<Idx: TupleIndex, T> {
     /// assert_eq!(tuple, ("c", 'd', 3));
     ///
     /// // Mutate by 'const' index.
-    /// *TypedIndex::<TupleIndex0, _>::get_mut_at(&mut tuple) = "e";
-    /// *TypedIndex::<TupleIndex1, _>::get_mut_at(&mut tuple) = 'f';
-    /// *TypedIndex::<TupleIndex2, _>::get_mut_at(&mut tuple) = 4usize;
+    /// *TypedIndex::<typenum::U0, _>::get_mut_at(&mut tuple) = "e";
+    /// *TypedIndex::<typenum::U1, _>::get_mut_at(&mut tuple) = 'f';
+    /// *TypedIndex::<typenum::U2, _>::get_mut_at(&mut tuple) = 4usize;
     /// assert_eq!(tuple, ("e", 'f', 4))
     /// ```
     fn get_mut_at(&mut self) -> &mut T;

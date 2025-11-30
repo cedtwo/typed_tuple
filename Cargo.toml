@@ -16,6 +16,7 @@ len_128 = ["typed_tuple_macros/len_128"]
 
 [dependencies]
 typed_tuple_macros = { path = "typed_tuple_macros" }
+typenum = "1.0"
 
 [lints.rust]
 missing_docs = "forbid"
