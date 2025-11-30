@@ -26,7 +26,7 @@ use crate::prelude::*;
 pub trait TypedLast<T>:
     LastIndex<NthType = T>
     + TypedUntil<<Self as LastIndex>::Last>
-    + TypedTuple<
+    + TypedBounds<
         <Self as LastIndex>::Last,
         T,
         SplitRightInclusive = (T,),
@@ -39,7 +39,7 @@ pub trait TypedLast<T>:
 impl<T, TT> TypedLast<T> for TT where
     TT: LastIndex<NthType = T>
         + TypedUntil<<TT as LastIndex>::Last>
-        + TypedTuple<
+        + TypedBounds<
             <TT as LastIndex>::Last,
             T,
             SplitRightInclusive = (T,),

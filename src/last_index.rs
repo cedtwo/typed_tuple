@@ -18,7 +18,7 @@ use crate::prelude::*;
 /// type LastIdx = <MyTuple as LastIndex>::Last;
 ///
 /// let tuple: MyTuple = (1, 2, 3);
-/// let last: &u32 = TypedTuple::<LastIdx, u32>::get(&tuple);
+/// let last: &u32 = tuple.get::<LastIdx>();
 /// assert_eq!(*last, 3u32);
 ///
 /// // Works with different tuple sizes
@@ -26,7 +26,7 @@ use crate::prelude::*;
 /// type BiggerLast = <BiggerTuple as LastIndex>::Last;
 ///
 /// let tuple2: BiggerTuple = (1, 2, 3, 4, 5);
-/// let last2: &i8 = TypedTuple::<BiggerLast, i8>::get(&tuple2);
+/// let last2: &i8 = tuple2.get::<BiggerLast>();
 /// assert_eq!(*last2, 5i8);
 /// ```
 pub trait LastIndex: NthIndex<Self::Last> {

@@ -78,16 +78,16 @@ fn test_saturating_sub_with_tuple_access() {
 
     // Access at index 7 - 2 = 5
     type Idx = <TupleIndex7 as TupleIndexSaturatingSub<TupleIndex2>>::Output;
-    let value: &i16 = TypedTuple::<Idx, i16>::get(&tuple);
+    let value: &i16 = tuple.get::<Idx>();
     assert_eq!(*value, 5i16);
 
     // Access at index 0 (saturated from 2 - 10)
     type Idx2 = <TupleIndex2 as TupleIndexSaturatingSub<TupleIndex10>>::Output;
-    let value2: &u8 = TypedTuple::<Idx2, u8>::get(&tuple);
+    let value2: &u8 = tuple.get::<Idx2>();
     assert_eq!(*value2, 0u8);
 
     // Access at index 3 (5 - 2)
     type Idx3 = <TupleIndex5 as TupleIndexSaturatingSub<TupleIndex2>>::Output;
-    let value3: &u64 = TypedTuple::<Idx3, u64>::get(&tuple);
+    let value3: &u64 = tuple.get::<Idx3>();
     assert_eq!(*value3, 3u64);
 }

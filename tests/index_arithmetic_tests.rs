@@ -59,12 +59,12 @@ fn test_index_arithmetic_with_tuple_access() {
 
     // Access at index 2 + 3 = 5
     type Idx = <TupleIndex2 as TupleIndexAdd<TupleIndex3>>::Output;
-    let value: &i16 = TypedTuple::<Idx, i16>::get(&tuple);
+    let value: &i16 = tuple.get::<Idx>();
     assert_eq!(*value, 5i16);
 
     // Access at index 7 - 2 = 5
     type Idx2 = <TupleIndex7 as TupleIndexSub<TupleIndex2>>::Output;
-    let value2: &i16 = TypedTuple::<Idx2, i16>::get(&tuple);
+    let value2: &i16 = tuple.get::<Idx2>();
     assert_eq!(*value2, 5i16);
 }
 

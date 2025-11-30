@@ -18,7 +18,7 @@ The main purpose of this crate is to simplfy small arbitrary operations on heter
 ### Basic Operations
 
 ```rust
-use typed_tuple::prelude::TypedTuple;
+use typed_tuple::prelude::*;
 
 let mut tuple: (i32, f64, String) = (0, 0.0, String::new());
 
@@ -51,25 +51,25 @@ assert_eq!(rest, (1u8, 2u16, 4u64));
 
 // Swap elements at different indices (same type)
 let mut tuple = (1u32, "hello", 2u32, 'x', 3u32);
-TypedTuple::<TupleIndex0, u32>::swap::<TupleIndex2>(&mut tuple);
+tuple.swap::<TupleIndex0, TupleIndex2>();
 assert_eq!(tuple, (2u32, "hello", 1u32, 'x', 3u32));
 
 // Split tuple exclusively (element separated)
 let tuple = (1u8, 2u16, 3u32, 4u64, 5i8);
-let (left, element, right) = TypedTuple::<TupleIndex2, u32>::split_exclusive(tuple);
+let (left, element, right) = tuple.split_exclusive::<TupleIndex2>();
 assert_eq!(left, (1u8, 2u16));
 assert_eq!(element, 3u32);
 assert_eq!(right, (4u64, 5i8));
 
 // Split tuple with element on left
 let tuple = (1u8, 2u16, 3u32, 4u64, 5i8);
-let (left, right) = TypedTuple::<TupleIndex2, u32>::split_left(tuple);
+let (left, right) = tuple.split_left::<TupleIndex2>();
 assert_eq!(left, (1u8, 2u16, 3u32));
 assert_eq!(right, (4u64, 5i8));
 
 // Split tuple with element on right
 let tuple = (1u8, 2u16, 3u32, 4u64, 5i8);
-let (left, right) = TypedTuple::<TupleIndex2, u32>::split_right(tuple);
+let (left, right) = tuple.split_right::<TupleIndex2>();
 assert_eq!(left, (1u8, 2u16));
 assert_eq!(right, (3u32, 4u64, 5i8));
 
@@ -97,11 +97,11 @@ type Last5 = <Tuple5 as LastIndex>::Last;
 
 // Access last elements using the markers
 let tuple2: Tuple2 = (1, 2);
-let last: &u16 = TypedTuple::<Last2, u16>::get(&tuple2);
+let last: &u16 = tuple2.get::<Last2>();
 assert_eq!(*last, 2u16);
 
 let tuple5: Tuple5 = (1, 2, 3, 4, 5);
-let last: &i8 = TypedTuple::<Last5, i8>::get(&tuple5);
+let last: &i8 = tuple5.get::<Last5>();
 assert_eq!(*last, 5i8);
 
 // All operations work with LastIndex
@@ -109,13 +109,13 @@ type Tuple3 = (u8, u16, u32);
 type Last3 = <Tuple3 as LastIndex>::Last;
 
 let mut tuple: Tuple3 = (1, 2, 3);
-TypedTuple::<Last3, u32>::apply(&mut tuple, |x| *x *= 10);
+tuple.apply::<Last3, _>(|x| *x *= 10);
 assert_eq!(tuple, (1u8, 2u16, 30u32));
 
 // Pop the last element
 let tuple: (u8, u16, u32, u64) = (1, 2, 3, 4);
 type LastIdx = <(u8, u16, u32, u64) as LastIndex>::Last;
-let (last, rest) = TypedTuple::<LastIdx, u64>::pop(tuple);
+let (last, rest) = tuple.pop::<LastIdx>();
 assert_eq!(last, 4u64);
 assert_eq!(rest, (1u8, 2u16, 3u32));
 ```
@@ -125,7 +125,7 @@ assert_eq!(rest, (1u8, 2u16, 3u32));
 The `TupleKey` trait enables defining blanket implementations that work with different tuple structures. You can use custom marker types to create semantic, type-safe APIs that work across various tuple layouts.
 
 ```rust
-use typed_tuple::prelude::{TupleKey, TypedTuple, TupleIndex0, TupleIndex1, TupleIndex2};
+use typed_tuple::prelude::*;
 
 // Define a marker type for semantic access
 struct AgeMarker;
@@ -138,7 +138,7 @@ trait GetAge {
 // Blanket implementation for any tuple that can be keyed by AgeMarker
 impl<T> GetAge for T
 where
-    Self: TypedTuple<<AgeMarker as TupleKey<Self>>::Idx, u8>,
+    Self: TypedIndex<<AgeMarker as TupleKey<Self>>::Idx, u8>,
     AgeMarker: TupleKey<Self>,
 {
     fn age(&self) -> u8 {

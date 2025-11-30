@@ -17,12 +17,12 @@ use crate::prelude::*;
 /// type SecondType = <MyTuple as NthIndex<TupleIndex1>>::NthType;
 ///
 /// let tuple: MyTuple = (1, 2, 3);
-/// let second: &SecondType = TypedTuple::<TupleIndex1, SecondType>::get(&tuple);
+/// let second: &SecondType = tuple.get::<TupleIndex1>();
 /// assert_eq!(*second, 2u16);
 ///
 /// // Works with different indices
 /// type ThirdType = <MyTuple as NthIndex<TupleIndex2>>::NthType;
-/// let third: &ThirdType = TypedTuple::<TupleIndex2, ThirdType>::get(&tuple);
+/// let third: &ThirdType = tuple.get::<TupleIndex2>();
 /// assert_eq!(*third, 3u32);
 /// ```
 pub trait NthIndex<Idx: TupleIndex> {

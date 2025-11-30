@@ -192,10 +192,12 @@ pub fn generate_chain_right_impls(_input: TokenStream) -> TokenStream {
                 continue;
             }
 
-            let left_params: Vec<_> =
-                (0..left_size).map(|i| quote::format_ident!("L{}", i)).collect();
-            let right_params: Vec<_> =
-                (0..right_size).map(|i| quote::format_ident!("R{}", i)).collect();
+            let left_params: Vec<_> = (0..left_size)
+                .map(|i| quote::format_ident!("L{}", i))
+                .collect();
+            let right_params: Vec<_> = (0..right_size)
+                .map(|i| quote::format_ident!("R{}", i))
+                .collect();
 
             let left_indices: Vec<_> = (0..left_size).map(syn::Index::from).collect();
             let right_indices: Vec<_> = (0..right_size).map(syn::Index::from).collect();
@@ -206,6 +208,7 @@ pub fn generate_chain_right_impls(_input: TokenStream) -> TokenStream {
 
                     #[inline]
                     fn chain_right(self, right: (#(#right_params,)*)) -> Self::Output {
+                        #[allow(unused_unit)]
                         (#(self.#left_indices,)* #(right.#right_indices,)*)
                     }
                 }
@@ -219,7 +222,7 @@ pub fn generate_chain_right_impls(_input: TokenStream) -> TokenStream {
     .into()
 }
 
-/// Generates TypedTuple trait implementations for all tuple sizes and indices
+/// Generates TypedIndex trait implementations for all tuple sizes and indices
 #[proc_macro]
 pub fn generate_typed_tuple_impls(_input: TokenStream) -> TokenStream {
     let mut impls = Vec::new();
@@ -240,7 +243,19 @@ pub fn generate_typed_tuple_impls(_input: TokenStream) -> TokenStream {
             let split_right_exclusive_indices = ((index + 1)..size).map(syn::Index::from);
 
             impls.push(quote! {
-                impl<#(#type_params),*> TypedTuple<#index_marker, #target_type> for (#(#type_params,)*) {
+                impl<#(#type_params),*> TypedIndex<#index_marker, #target_type> for (#(#type_params,)*) {
+
+                    #[inline]
+                    fn get_at(&self) -> &#target_type {
+                        &self.#index_lit
+                    }
+                    #[inline]
+                    fn get_mut_at(&mut self) -> &mut #target_type {
+                        &mut self.#index_lit
+                    }
+                }
+
+                impl<#(#type_params),*> TypedBounds<#index_marker, #target_type> for (#(#type_params,)*) {
                     type PopOutput = <Self::SplitLeftExclusive as ChainRight<Self::SplitRightExclusive>>::Output;
                     type SplitLeftExclusive = (#(#split_left_exclusive_types,)*);
                     type SplitLeftInclusive = <Self::SplitLeftExclusive as ChainRight<(#target_type,)>>::Output;
@@ -248,15 +263,7 @@ pub fn generate_typed_tuple_impls(_input: TokenStream) -> TokenStream {
                     type SplitRightInclusive = <(#target_type,) as ChainRight<Self::SplitRightExclusive>>::Output;
 
                     #[inline]
-                    fn get(&self) -> &#target_type {
-                        &self.#index_lit
-                    }
-                    #[inline]
-                    fn get_mut(&mut self) -> &mut #target_type {
-                        &mut self.#index_lit
-                    }
-                    #[inline]
-                    fn split_exclusive(self) -> (Self::SplitLeftExclusive, #target_type, Self::SplitRightExclusive) {
+                    fn split_exclusive_at(self) -> (Self::SplitLeftExclusive, #target_type, Self::SplitRightExclusive) {
                         ((#(self.#split_left_exclusive_indices,)*), self.#index_lit, (#(self.#split_right_exclusive_indices,)*))
                     }
                 }
@@ -316,9 +323,9 @@ pub fn define_typed_last_trait(_input: TokenStream) -> TokenStream {
         });
     }
 
-    // Add the final TypedTuple bound
+    // Add the final TypedIndex bound
     bounds.push(quote! {
-        TypedTuple<
+        TypedIndex<
             <Self as LastIndex>::Last,
             T,
             SplitRightInclusive = (T,),
@@ -331,7 +338,7 @@ pub fn define_typed_last_trait(_input: TokenStream) -> TokenStream {
         /// Trait for accessing the last element of a tuple by type.
         ///
         /// This trait is implemented for tuples where the last element is of type `T`.
-        /// It combines the functionality of `LastIndex` and `TypedTuple` to provide
+        /// It combines the functionality of `LastIndex` and `TypedIndex` to provide
         /// type-safe access to the last element.
         ///
         /// # Examples
@@ -372,9 +379,9 @@ pub fn impl_typed_last_trait(_input: TokenStream) -> TokenStream {
         });
     }
 
-    // Add the final TypedTuple bound
+    // Add the final TypedIndex bound
     bounds.push(quote! {
-        TypedTuple<
+        TypedIndex<
             <TT as LastIndex>::Last,
             T,
             SplitRightInclusive = (T,),
@@ -394,25 +401,25 @@ pub fn impl_typed_last_trait(_input: TokenStream) -> TokenStream {
 #[proc_macro]
 pub fn define_typed_until_trait(_input: TokenStream) -> TokenStream {
     let mut bounds = Vec::new();
-    
+
     // Add the basic bound
     bounds.push(quote! { NthIndex<Idx> });
-    
+
     // Add TypedNth bounds for Idx and Idx - i for all i
     bounds.push(quote! { TypedNth<Idx> });
-    
+
     for i in 1..MAX_SIZE {
         let index_marker = quote::format_ident!("TupleIndex{}", i);
-        bounds.push(quote! { 
-            TypedNth<<Idx as TupleIndexSaturatingSub<#index_marker>>::Output> 
+        bounds.push(quote! {
+            TypedNth<<Idx as TupleIndexSaturatingSub<#index_marker>>::Output>
         });
     }
-    
-    // Add the TypedTuple bound
+
+    // Add the TypedIndex bound
     bounds.push(quote! {
-        TypedTuple<Idx, <Self as NthIndex<Idx>>::NthType>
+        TypedIndex<Idx, <Self as NthIndex<Idx>>::NthType>
     });
-    
+
     quote! {
         /// Trait for accessing elements of a tuple up to a specific index.
         ///
@@ -433,25 +440,25 @@ pub fn define_typed_until_trait(_input: TokenStream) -> TokenStream {
 #[proc_macro]
 pub fn impl_typed_until_trait(_input: TokenStream) -> TokenStream {
     let mut bounds = Vec::new();
-    
+
     // Add the basic bound
     bounds.push(quote! { NthIndex<Idx> });
-    
+
     // Add TypedNth bounds for Idx and Idx - i for all i
     bounds.push(quote! { TypedNth<Idx> });
-    
+
     for i in 1..MAX_SIZE {
         let index_marker = quote::format_ident!("TupleIndex{}", i);
-        bounds.push(quote! { 
-            TypedNth<<Idx as TupleIndexSaturatingSub<#index_marker>>::Output> 
+        bounds.push(quote! {
+            TypedNth<<Idx as TupleIndexSaturatingSub<#index_marker>>::Output>
         });
     }
-    
-    // Add the TypedTuple bound
+
+    // Add the TypedIndex bound
     bounds.push(quote! {
-        TypedTuple<Idx, <TT as NthIndex<Idx>>::NthType>
+        TypedIndex<Idx, <TT as NthIndex<Idx>>::NthType>
     });
-    
+
     quote! {
         impl<Idx: TupleIndex, TT> TypedUntil<Idx> for TT where TT: #(#bounds)+* {
         }
@@ -463,17 +470,17 @@ pub fn impl_typed_until_trait(_input: TokenStream) -> TokenStream {
 #[proc_macro]
 pub fn define_nth_indexed_until_trait(_input: TokenStream) -> TokenStream {
     let mut bounds = Vec::new();
-    
+
     // Add NthIndex bounds for Idx and all saturating subtractions
     bounds.push(quote! { NthIndex<Idx> });
-    
+
     for i in 1..MAX_SIZE {
         let index_marker = quote::format_ident!("TupleIndex{}", i);
-        bounds.push(quote! { 
+        bounds.push(quote! {
             NthIndex<<Idx as TupleIndexSaturatingSub<#index_marker>>::Output>
         });
     }
-    
+
     quote! {
         /// Trait for tuples that implement `NthIndex` up to a specific index.
         ///
@@ -489,21 +496,21 @@ pub fn define_nth_indexed_until_trait(_input: TokenStream) -> TokenStream {
 #[proc_macro]
 pub fn impl_nth_indexed_until_trait(_input: TokenStream) -> TokenStream {
     let mut bounds = Vec::new();
-    
+
     // Add NthIndex bounds for Idx and all saturating subtractions
     bounds.push(quote! { NthIndex<Idx> });
-    
+
     for i in 1..MAX_SIZE {
         let index_marker = quote::format_ident!("TupleIndex{}", i);
-        bounds.push(quote! { 
+        bounds.push(quote! {
             NthIndex<<Idx as TupleIndexSaturatingSub<#index_marker>>::Output>
         });
     }
-    
+
     quote! {
-        impl<Idx: TupleIndex, TT> NthIndexedUntil<Idx> for TT 
-        where 
-            TT: #(#bounds)+* 
+        impl<Idx: TupleIndex, TT> NthIndexedUntil<Idx> for TT
+        where
+            TT: #(#bounds)+*
         {
         }
     }
@@ -514,25 +521,25 @@ pub fn impl_nth_indexed_until_trait(_input: TokenStream) -> TokenStream {
 #[proc_macro]
 pub fn define_nth_indexed_as_trait(_input: TokenStream) -> TokenStream {
     let mut bounds = Vec::new();
-    
+
     // Add the basic bound
     bounds.push(quote! { NthIndexedUntil<Idx> });
-    
+
     // Add type equality bounds for Idx and all saturating subtractions
-    bounds.push(quote! { 
+    bounds.push(quote! {
         NthIndex<Idx, NthType = <TT as NthIndex<Idx>>::NthType>
     });
-    
+
     for i in 1..MAX_SIZE {
         let index_marker = quote::format_ident!("TupleIndex{}", i);
-        bounds.push(quote! { 
+        bounds.push(quote! {
             NthIndex<
                 <Idx as TupleIndexSaturatingSub<#index_marker>>::Output,
                 NthType = <TT as NthIndex<<Idx as TupleIndexSaturatingSub<#index_marker>>::Output>>::NthType
             >
         });
     }
-    
+
     quote! {
         /// Trait for tuples with matching element types up to a specific index.
         ///
@@ -548,29 +555,29 @@ pub fn define_nth_indexed_as_trait(_input: TokenStream) -> TokenStream {
 #[proc_macro]
 pub fn impl_nth_indexed_as_trait(_input: TokenStream) -> TokenStream {
     let mut bounds = Vec::new();
-    
+
     // Add the basic bound
     bounds.push(quote! { NthIndexedUntil<Idx> });
-    
+
     // Add type equality bounds for Idx and all saturating subtractions
-    bounds.push(quote! { 
+    bounds.push(quote! {
         NthIndex<Idx, NthType = <Other as NthIndex<Idx>>::NthType>
     });
-    
+
     for i in 1..MAX_SIZE {
         let index_marker = quote::format_ident!("TupleIndex{}", i);
-        bounds.push(quote! { 
+        bounds.push(quote! {
             NthIndex<
                 <Idx as TupleIndexSaturatingSub<#index_marker>>::Output,
                 NthType = <Other as NthIndex<<Idx as TupleIndexSaturatingSub<#index_marker>>::Output>>::NthType
             >
         });
     }
-    
+
     quote! {
-        impl<Idx: TupleIndex, Other: NthIndexedUntil<Idx>, TT> NthIndexedAs<Idx, Other> for TT 
-        where 
-            TT: #(#bounds)+* 
+        impl<Idx: TupleIndex, Other: NthIndexedUntil<Idx>, TT> NthIndexedAs<Idx, Other> for TT
+        where
+            TT: #(#bounds)+*
         {
         }
     }

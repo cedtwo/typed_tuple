@@ -208,18 +208,18 @@ fn test_const_index_access() {
     let mut tuple = (1u8, 2u16, 3u32);
 
     // Access by const index
-    let first = TypedTuple::<TupleIndex0, _>::get(&tuple);
-    let second = TypedTuple::<TupleIndex1, _>::get(&tuple);
-    let third = TypedTuple::<TupleIndex2, _>::get(&tuple);
+    let first = tuple.get::<TupleIndex0>();
+    let second = tuple.get::<TupleIndex1>();
+    let third = tuple.get::<TupleIndex2>();
 
     assert_eq!(*first, 1u8);
     assert_eq!(*second, 2u16);
     assert_eq!(*third, 3u32);
 
     // Mutate by const index
-    *TypedTuple::<TupleIndex0, _>::get_mut(&mut tuple) = 10u8;
-    *TypedTuple::<TupleIndex1, _>::get_mut(&mut tuple) = 20u16;
-    *TypedTuple::<TupleIndex2, _>::get_mut(&mut tuple) = 30u32;
+    *tuple.get_mut::<TupleIndex0>() = 10u8;
+    *tuple.get_mut::<TupleIndex1>() = 20u16;
+    *tuple.get_mut::<TupleIndex2>() = 30u32;
 
     assert_eq!(tuple, (10u8, 20u16, 30u32));
 }
