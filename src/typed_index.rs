@@ -1,3 +1,5 @@
+use typed_tuple_macros::impl_typed_index;
+
 /// Trait for tuple element manipulation by type.
 pub trait TypedIndex<const INDEX: usize, T> {
     /// Get a reference to the element of type `T`.
@@ -37,38 +39,4 @@ pub trait TypedIndex<const INDEX: usize, T> {
     fn get_mut(&mut self) -> &mut T;
 }
 
-macro_rules! impl_typed_tuple {
-    (( $($generics:tt ),* ), [ $( $( $idx_tail:tt ),+ )? ], []) => {};
-
-    (( $($generics:tt ),* ), [$idx_head:tt  $(, $idx_tail:tt )* ], [ $gen_head:tt $(, $gen_tail:tt )* ]) => {
-        impl< $( $generics ),+ > TypedIndex<$idx_head, $gen_head> for ( $( $generics ),+ ) {
-            fn get(&self) -> &$gen_head {
-                &self.$idx_head
-            }
-
-            fn get_mut(&mut self) -> &mut $gen_head {
-                &mut self.$idx_head
-            }
-        }
-        impl_typed_tuple!(($( $generics ),* ), [ $( $idx_tail ),* ], [ $( $gen_tail ),* ]);
-    };
-
-    (( $($generics:tt),* )) => {
-        impl_typed_tuple!(
-            ( $( $generics ),* ),
-            [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
-            [ $( $generics ),* ]);
-    }
-}
-
-impl_typed_tuple!((A, B));
-impl_typed_tuple!((A, B, C));
-impl_typed_tuple!((A, B, C, D));
-impl_typed_tuple!((A, B, C, D, E));
-impl_typed_tuple!((A, B, C, D, E, F));
-impl_typed_tuple!((A, B, C, D, E, F, G));
-impl_typed_tuple!((A, B, C, D, E, F, G, H));
-impl_typed_tuple!((A, B, C, D, E, F, G, H, I));
-impl_typed_tuple!((A, B, C, D, E, F, G, H, I, K));
-impl_typed_tuple!((A, B, C, D, E, F, G, H, I, K, J));
-impl_typed_tuple!((A, B, C, D, E, F, G, H, I, K, J, L));
+impl_typed_index!(12);
