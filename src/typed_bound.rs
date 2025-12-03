@@ -1,3 +1,5 @@
+use typed_tuple_macros::impl_typed_bound;
+
 /// Trait for mapping elements of either side of an index (left inclusive).
 pub trait TypedBound<const INDEX: usize, L, R>: Sized {
     /// Split the tuple.
@@ -17,3 +19,5 @@ pub trait TypedBound<const INDEX: usize, L, R>: Sized {
     /// ```
     fn split(self) -> (L, R);
 }
+
+impl_typed_bound!(12);

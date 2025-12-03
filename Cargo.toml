@@ -9,3 +9,6 @@ repository = "https://github.com/cedtwo/typed_tuple.git"
 license = "MIT OR Apache-2.0"
 keywords = ["tuple", "type", "typed", "heterogenous"]
 categories = ["data-structures", "rust-patterns"]
+
+[dependencies]
+typed_tuple_macros = { path = "./typed_tuple_macros" }

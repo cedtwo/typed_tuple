@@ -42,6 +42,8 @@
 //! as it is the limit of many tuple trait implementations (`PartialEq`, `Eq`, etc.),
 //! however can be extended to support a higher number of elements if needed.
 
+mod typed_bound;
 mod typed_index;
 
+pub use typed_bound::TypedBound;
 pub use typed_index::TypedIndex;
