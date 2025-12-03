@@ -35,27 +35,6 @@ pub trait TypedIndex<const INDEX: usize, T> {
     /// assert_eq!(tuple, ("e", 'f', 4))
     /// ```
     fn get_mut(&mut self) -> &mut T;
-
-    /// Takes a closure, mutating the element of type `T`.
-    /// # Example
-    /// ```
-    /// # use typed_tuple::TypedIndex;
-    /// // Map by type.
-    /// let mut tuple = ("a".to_string(), 1u8, 2usize);
-    /// tuple.map(|el: String| el.to_uppercase());
-    /// tuple.map(|el: u8| el + 1);
-    /// tuple.map(|el: usize| el + 2);
-    /// assert_eq!(tuple, ("A".to_string(), 2, 4));
-    ///
-    /// // Map by 'const' index.
-    /// TypedIndex::<0, _>::map(&mut tuple, |el| el.to_lowercase());
-    /// TypedIndex::<1, _>::map(&mut tuple, |el| el - 1);
-    /// TypedIndex::<2, _>::map(&mut tuple, |el| el - 2);
-    /// assert_eq!(tuple, ("a".to_string(), 1, 2))
-    /// ```
-    fn map<FN: FnOnce(T) -> T>(&mut self, f: FN)
-    where
-        T: Default;
 }
 
 macro_rules! impl_typed_tuple {
@@ -69,10 +48,6 @@ macro_rules! impl_typed_tuple {
 
             fn get_mut(&mut self) -> &mut $gen_head {
                 &mut self.$idx_head
-            }
-
-            fn map<FN: FnOnce($gen_head) -> $gen_head>(&mut self, f: FN) where $gen_head: Default {
-                self.$idx_head = f(std::mem::take(&mut self.$idx_head));
             }
         }
         impl_typed_tuple!(($( $generics ),* ), [ $( $idx_tail ),* ], [ $( $gen_tail ),* ]);

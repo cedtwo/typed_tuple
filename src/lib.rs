@@ -18,9 +18,8 @@
 //! # struct Type2;
 //! let mut tuple: (usize, Option<Type0>, Option<Type1>, Option<Type2>) = Default::default();
 //!
-//! // Mutate the `usize` element.
-//! tuple.map(|el: usize| el + 10);;
-//! // Assign the `Type` prefixed elements.
+//! // Assign values by type.
+//! *tuple.get_mut() = 10;
 //! *tuple.get_mut() = Some(Type0);
 //! *tuple.get_mut() = Some(Type2);
 //!
