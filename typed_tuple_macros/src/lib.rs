@@ -4,6 +4,7 @@ use proc_macro::TokenStream;
 use syn::*;
 
 mod typed_bound;
+mod typed_extract;
 mod typed_index;
 
 /// Implement `TypedIndex` on tuples of fields less than or equal to the given
@@ -36,6 +37,24 @@ pub fn impl_typed_bound(item: TokenStream) -> TokenStream {
     match parse_int(item).map_err(|e| e.into_compile_error()) {
         Ok(n) => (0..n + 1).fold(TokenStream::new(), |mut stream, i| {
             stream.extend(typed_bound::impl_typed_bound(i));
+            stream
+        }),
+        Err(e) => e.into(),
+    }
+}
+
+/// Implement `TypedExtract` on tuples of fields less than or equal to the given
+/// integer literal.
+///
+/// # Example
+/// ```
+/// impl_typed_extract!(12); // Implement on tuples of 1 to 12 fields.
+/// ```
+#[proc_macro]
+pub fn impl_typed_extract(item: TokenStream) -> TokenStream {
+    match parse_int(item).map_err(|e| e.into_compile_error()) {
+        Ok(n) => (0..n + 1).fold(TokenStream::new(), |mut stream, i| {
+            stream.extend(typed_extract::impl_typed_extract(i));
             stream
         }),
         Err(e) => e.into(),

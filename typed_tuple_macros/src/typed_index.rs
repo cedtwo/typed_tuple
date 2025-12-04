@@ -4,10 +4,11 @@ use syn::Index;
 
 /// Implement `TypedIndex` for a tuple of `n` elements.
 pub(super) fn impl_typed_index(n: usize) -> TokenStream {
+    let indices = (0..n).map(|i| Index::from(i)).collect::<Vec<_>>();
     let generics = (0..n).map(|i| format_ident!("T{i}")).collect::<Vec<_>>();
 
     (0..n).fold(TokenStream::new(), |mut stream, i| {
-        let index = Index::from(i);
+        let index = &indices[i];
         let generic = &generics[i as usize];
 
         stream.extend(TokenStream::from(quote! {

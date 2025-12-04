@@ -43,7 +43,9 @@
 //! however can be extended to support a higher number of elements if needed.
 
 mod typed_bound;
+mod typed_extract;
 mod typed_index;
 
 pub use typed_bound::TypedBound;
+pub use typed_extract::TypedExtract;
 pub use typed_index::TypedIndex;
