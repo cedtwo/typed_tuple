@@ -13,11 +13,19 @@ pub(super) fn impl_typed_index(n: usize) -> TokenStream {
 
         stream.extend(TokenStream::from(quote! {
             impl< #( #generics ),* > TypedIndex< #index, #generic> for ( #( #generics, )* ) {
-                fn get(&self) -> &#generic {
+                fn get(self) -> #generic {
+                    self.#index
+                }
+            }
+
+            impl<'a, #( #generics ),* > TypedIndex< #index, &'a #generic> for &'a ( #( #generics, )* ) {
+                fn get(self) -> &'a #generic {
                     &self.#index
                 }
+            }
 
-                fn get_mut(&mut self) -> &mut #generic {
+            impl<'a, #( #generics ),* > TypedIndex< #index, &'a mut #generic> for &'a mut ( #( #generics, )* ) {
+                fn get(self) -> &'a mut #generic {
                     &mut self.#index
                 }
             }

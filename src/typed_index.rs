@@ -1,42 +1,64 @@
 use typed_tuple_macros::impl_typed_index;
 
-/// Trait for tuple element manipulation by type.
+/// ## TypedIndex
+///
+/// [`TypedIndex`] enables tuple element access by inferring the *unique* element,
+/// type, or passing an explicit numeric index.
+///
+/// [`TypedIndex::get`] consumes `Self` returning an element, borrows `&Self`, returning
+/// an element reference, and mutably borrows `&mut Self` returning a mutable element
+/// reference.
+///
+/// ```rust
+/// # use typed_tuple::TypedIndex;
+/// let mut tuple = (0u8, 1u16, 2u32);
+///
+/// let el_ref: &u16 = (&tuple).get();
+/// let el_mut: &mut u16 = (&mut tuple).get();
+/// let el: u16 = tuple.get();
+/// ```
+///
+/// ## Get by type
+///
+/// An index is inferred by either specifying, or inferring the element type.
+///
+/// ```rust
+/// # use typed_tuple::TypedIndex;
+/// let tuple = (0u8, 1u16, 2u32, 3u64, 4u128);
+///
+/// // Get the unique `u64` element.
+/// let element: u64 = tuple.get();
+/// assert_eq!(element, 3);
+/// ```
+///
+/// ## Get by index
+///
+/// Where a unique type cannot be specified, the element `INDEX` must be specified.
+///
+/// ```rust
+/// # use typed_tuple::TypedIndex;
+/// let tuple = (0u8, 1u16, 2u32, 3u64, 4u128);
+///
+/// // Split at index 3.
+/// let element = TypedIndex::<3, _>::get(tuple);
+/// assert_eq!(element, 3);
+/// ```
 pub trait TypedIndex<const INDEX: usize, T> {
     /// Get a reference to the element of type `T`.
     /// # Example
     /// ```
     /// # use typed_tuple::TypedIndex;
-    /// // Get by type.
     /// let tuple = ("a", 'b', 2usize);
-    /// let a: &&str = tuple.get();
-    /// let b: &char = tuple.get();
-    /// let c: &usize = tuple.get();
     ///
-    /// // Get by 'const' index.
-    /// let a = TypedIndex::<0, _>::get(&tuple);
-    /// let b = TypedIndex::<1, _>::get(&tuple);
-    /// let c = TypedIndex::<2, _>::get(&tuple);
-    /// ```
-    fn get(&self) -> &T;
-
-    /// Get a mutable reference to the element of type `T`.
-    /// # Example
-    /// ```
-    /// # use typed_tuple::TypedIndex;
-    /// // Mutate by type.
-    /// let mut tuple = ("a", 'b', 2usize);
-    /// *tuple.get_mut() = "c";
-    /// *tuple.get_mut() = 'd';
-    /// *tuple.get_mut() = 3usize;
-    /// assert_eq!(tuple, ("c", 'd', 3));
+    /// // Get by type.
+    /// let element: &str = tuple.get();
+    /// assert_eq!(element, "a");
     ///
-    /// // Mutate by 'const' index.
-    /// *TypedIndex::<0, _>::get_mut(&mut tuple) = "e";
-    /// *TypedIndex::<1, _>::get_mut(&mut tuple) = 'f';
-    /// *TypedIndex::<2, _>::get_mut(&mut tuple) = 4usize;
-    /// assert_eq!(tuple, ("e", 'f', 4))
+    /// // Get by index.
+    /// let element = TypedIndex::<1, _>::get(tuple);
+    /// assert_eq!(element, 'b');
     /// ```
-    fn get_mut(&mut self) -> &mut T;
+    fn get(self) -> T;
 }
 
 impl_typed_index!(12);
