@@ -35,7 +35,7 @@ pub fn impl_typed_index(item: TokenStream) -> TokenStream {
 #[proc_macro]
 pub fn impl_typed_bound(item: TokenStream) -> TokenStream {
     match parse_int(item).map_err(|e| e.into_compile_error()) {
-        Ok(n) => (0..n + 1).fold(TokenStream::new(), |mut stream, i| {
+        Ok(n) => (1..n + 1).fold(TokenStream::new(), |mut stream, i| {
             stream.extend(typed_bound::impl_typed_bound(i));
             stream
         }),

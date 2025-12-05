@@ -34,7 +34,7 @@ use typed_tuple_macros::impl_typed_extract;
 ///
 /// Where a tuple pattern is not inferred, both the `INDEX_START` and `INDEX_END` arguments
 /// must be specified. Indices are representative of an inclusive and exclusive lower and upper
-/// range bound respectively (analogous to the indices of [`std::ops::Range`]).
+/// range bound respectively (analogous to the indices of [`core::ops::Range`]).
 ///
 /// ```rust
 /// # use typed_tuple::TypedExtract;
@@ -58,11 +58,11 @@ pub trait TypedExtract<const INDEX_START: usize, const INDEX_END: usize, T>: Siz
     /// # use typed_tuple::TypedExtract;
     /// let tuple = (0u8, 1u16, 2u32, 3u64, 4u128, 5u8, 6u16, 7u32);
     ///
-    /// // Get the 3 elements starting from type `u16`.
+    /// // Infer an element segment.
     /// let extracted: (u16, _, _) = tuple.extract();
     /// assert_eq!(extracted, (1, 2, 3));
     ///
-    /// // Get elements of the index range `2..6`.
+    /// // Specify an element segment by index range (2..6).
     /// let extracted = TypedExtract::<2, 6, _>::extract(tuple);
     /// assert_eq!(extracted, (2, 3, 4, 5));
     /// ```
