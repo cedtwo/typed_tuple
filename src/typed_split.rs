@@ -1,8 +1,8 @@
-use typed_tuple_macros::impl_typed_bound;
+use typed_tuple_macros::impl_typed_split;
 
-/// ## TypedBound
+/// ## TypedSplit
 ///
-/// [`TypedBound`] allows for a tuple to be split given a type patterns. A tuple
+/// [`TypedSplit`] allows for a tuple to be split given a type patterns. A tuple
 /// can be split either specifying the leftmost or rightmost tuple pattern, or by
 /// inferring a tuple sequence for extraction, or by explicitly defining the
 /// left-exclusive/right-inclusive center bound index `INDEX`.
@@ -13,7 +13,7 @@ use typed_tuple_macros::impl_typed_bound;
 /// in either (or both) the left or right segment.
 ///
 /// ```rust
-/// # use typed_tuple::TypedBound;
+/// # use typed_tuple::TypedSplit;
 /// let tuple = (0u8, 1u16, 2u32, 3u64, 4u128);
 ///
 /// // Split after the first 3 elements.
@@ -35,27 +35,27 @@ use typed_tuple_macros::impl_typed_bound;
 /// to the indices of split operations in [`core::slice`]).
 ///
 /// ```rust
-/// # use typed_tuple::TypedBound;
+/// # use typed_tuple::TypedSplit;
 /// let tuple = (0u8, 1u16, 2u32, 3u64, 4u128);
 ///
 /// // Split at index 3.
-/// let (left, right) = TypedBound::<3, _, _>::split(tuple);
+/// let (left, right) = TypedSplit::<3, _, _>::split(tuple);
 /// assert_eq!(left, (0, 1, 2));
 /// assert_eq!(right, (3, 4));
 ///
 /// // Split at index 0.
-/// let (left, right) = TypedBound::<0, _, _>::split(tuple);
+/// let (left, right) = TypedSplit::<0, _, _>::split(tuple);
 /// assert_eq!(left, ());
 /// assert_eq!(right, (0, 1, 2, 3, 4));
 /// ```
-pub trait TypedBound<const INDEX: usize, L, R>: Sized {
+pub trait TypedSplit<const INDEX: usize, L, R>: Sized {
     /// Split a tuple by specifying the leftmost elements, rightmost elements, or
     /// the (left-exclusive/right-inclusive) center bound index `INDEX`. See the
-    /// documentation of [`TypedBound`] for usage.
+    /// documentation of [`TypedSplit`] for usage.
     ///
     /// # Example
     /// ```
-    /// # use typed_tuple::TypedBound;
+    /// # use typed_tuple::TypedSplit;
     /// let tuple = (0u8, 1u16, 2u32, 3u64, 4u128);
     ///
     /// // Infer an index given the left segment.
@@ -64,11 +64,11 @@ pub trait TypedBound<const INDEX: usize, L, R>: Sized {
     /// assert_eq!(r, (3, 4));
     ///
     /// // Specify an index (2) for splitting the left/right segment.
-    /// let (l, r) = TypedBound::<2, _, _>::split(tuple);
+    /// let (l, r) = TypedSplit::<2, _, _>::split(tuple);
     /// assert_eq!(l, (0, 1));
     /// assert_eq!(r, (2, 3, 4));
     /// ```
     fn split(self) -> (L, R);
 }
 
-impl_typed_bound!(12);
+impl_typed_split!(12);

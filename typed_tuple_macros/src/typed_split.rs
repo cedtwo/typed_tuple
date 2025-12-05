@@ -2,8 +2,8 @@ use proc_macro::TokenStream;
 use quote::{format_ident, quote};
 use syn::Index;
 
-/// Implement `TypedBound` for a tuple of `n` elements.
-pub(super) fn impl_typed_bound(n: usize) -> TokenStream {
+/// Implement `TypedSplit` for a tuple of `n` elements.
+pub(super) fn impl_typed_split(n: usize) -> TokenStream {
     let indices = (0..n + 1).map(|i| Index::from(i)).collect::<Vec<_>>();
     let generics = (0..n).map(|i| format_ident!("T{i}")).collect::<Vec<_>>();
 
@@ -17,7 +17,7 @@ pub(super) fn impl_typed_bound(n: usize) -> TokenStream {
         let generic_right = generics.iter().skip(i).collect::<Vec<_>>();
 
         stream.extend(TokenStream::from(quote! {
-            impl< #( #generics ),* > TypedBound< #index, ( #( #generic_left, )* ), ( #( #generic_right, )* )> for ( #( #generics, )* ) {
+            impl< #( #generics ),* > TypedSplit< #index, ( #( #generic_left, )* ), ( #( #generic_right, )* )> for ( #( #generics, )* ) {
                 fn split(self) -> (( #( #generic_left, )* ), ( #( #generic_right, )* )) {
                     (
                         ( #( self.#idx_left, )* ),

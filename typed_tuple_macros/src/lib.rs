@@ -3,9 +3,9 @@ extern crate proc_macro;
 use proc_macro::TokenStream;
 use syn::*;
 
-mod typed_bound;
 mod typed_extract;
 mod typed_index;
+mod typed_split;
 
 /// Implement `TypedIndex` on tuples of fields less than or equal to the given
 /// integer literal.
@@ -25,7 +25,7 @@ pub fn impl_typed_index(item: TokenStream) -> TokenStream {
     }
 }
 
-/// Implement `TypedBound` on tuples of fields less than or equal to the given
+/// Implement `TypedSplit` on tuples of fields less than or equal to the given
 /// integer literal.
 ///
 /// # Example
@@ -33,10 +33,10 @@ pub fn impl_typed_index(item: TokenStream) -> TokenStream {
 /// impl_typed_bound!(12); // Implement on tuples of 1 to 12 fields.
 /// ```
 #[proc_macro]
-pub fn impl_typed_bound(item: TokenStream) -> TokenStream {
+pub fn impl_typed_split(item: TokenStream) -> TokenStream {
     match parse_int(item).map_err(|e| e.into_compile_error()) {
         Ok(n) => (1..n + 1).fold(TokenStream::new(), |mut stream, i| {
-            stream.extend(typed_bound::impl_typed_bound(i));
+            stream.extend(typed_split::impl_typed_split(i));
             stream
         }),
         Err(e) => e.into(),
