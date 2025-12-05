@@ -25,6 +25,24 @@ pub(super) fn impl_typed_split(n: usize) -> TokenStream {
                     )
                 }
             }
+
+            impl<'a,  #( #generics ),* > TypedSplit< #index, ( #( &'a #generic_left, )* ), ( #( &'a #generic_right, )* )> for &'a ( #( #generics, )* ) {
+                fn split(self) -> (( #( &'a #generic_left, )* ), ( #( &'a #generic_right, )* )) {
+                    (
+                        ( #( &self.#idx_left, )* ),
+                        ( #( &self.#idx_right, )* )
+                    )
+                }
+            }
+
+            impl<'a,  #( #generics ),* > TypedSplit< #index, ( #( &'a mut #generic_left, )* ), ( #( &'a mut #generic_right, )* )> for &'a mut ( #( #generics, )* ) {
+                fn split(self) -> (( #( &'a mut #generic_left, )* ), ( #( &'a mut #generic_right, )* )) {
+                    (
+                        ( #( &mut self.#idx_left, )* ),
+                        ( #( &mut self.#idx_right, )* )
+                    )
+                }
+            }
         }));
 
         stream

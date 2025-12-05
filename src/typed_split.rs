@@ -7,6 +7,19 @@ use typed_tuple_macros::impl_typed_split;
 /// inferring a tuple sequence for extraction, or by explicitly defining the
 /// left-exclusive/right-inclusive center bound index `INDEX`.
 ///
+/// [`TypedSplit`] consumes `Self` returning the specified elements, borrows `&Self`,
+/// returning element references, and mutably borrow `&mut Self` returning mutable element
+/// references.
+///
+/// ```rust
+/// # use typed_tuple::TypedSplit;
+/// let mut tuple = (0u8, 1u16, 2u32);
+///
+/// let (_, last_ref): (_, (&_,)) = (&tuple).split();
+/// let (_, last_mut): (_, (&mut _,)) = (&mut tuple).split();
+/// let (_, last): (_, (_,)) = tuple.split();
+/// ```
+///
 /// ## Type pattern splitting
 ///
 /// An index will be inferred by, at a minimum, specifying the number of elements
