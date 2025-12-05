@@ -6,6 +6,19 @@ use typed_tuple_macros::impl_typed_extract;
 /// A tuple range can either be specified by inferring a tuple sequence for extraction,
 /// or by explicitly defining an inclusive and exclusive lower and upper bound respectively.
 ///
+/// [`TypedExtract`] consumes `Self` returning the specified elements, borrows `&Self`,
+/// returning element references, and mutably borrow `&mut Self` returning mutable element
+/// references.
+///
+/// ```rust
+/// # use typed_tuple::TypedExtract;
+/// let mut tuple = (0u8, 1u16, 2u32);
+///
+/// let element_ref: (&u16,) = (&tuple).extract();
+/// let element_mut: (&mut u16,) = (&mut tuple).extract();
+/// let element: (u16,) = tuple.extract();
+/// ```
+///
 /// ## Type pattern extraction
 ///
 /// An inferred **unique** tuple pattern can be extracted without providing an explicit
@@ -47,7 +60,6 @@ use typed_tuple_macros::impl_typed_extract;
 /// // Get elements of the index range `2..6`.
 /// let extracted = TypedExtract::<2, 6, _>::extract(tuple);
 /// assert_eq!(extracted, (2, 3, 4, 5));
-///
 /// ```
 pub trait TypedExtract<const INDEX_START: usize, const INDEX_END: usize, T>: Sized {
     /// Extract sequentual elements inferred by a type pattern and/or indices.

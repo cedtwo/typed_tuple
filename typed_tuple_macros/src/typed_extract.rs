@@ -22,6 +22,18 @@ pub(super) fn impl_typed_extract(n: usize) -> TokenStream {
                         ( #( self.#idx_range, )* )
                     }
                 }
+
+                impl<'a,  #( #generics ),* > TypedExtract< #index_start, #index_end, ( #( &'a #generic_range, )* )> for &'a ( #( #generics, )* ) {
+                    fn extract(self) -> ( #( &'a #generic_range, )* ) {
+                        ( #( &self.#idx_range, )* )
+                    }
+                } 
+
+                impl<'a,  #( #generics ),* > TypedExtract< #index_start, #index_end, ( #( &'a mut #generic_range, )* )> for &'a mut ( #( #generics, )* ) {
+                    fn extract(self) -> ( #( &'a mut #generic_range, )* ) {
+                        ( #( &mut self.#idx_range, )* )
+                    }
+                } 
             }));
         });
         stream
