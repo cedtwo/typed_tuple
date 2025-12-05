@@ -6,20 +6,19 @@ use typed_tuple_macros::impl_typed_extract;
 /// A tuple range can either be specified by inferring a tuple sequence for extraction,
 /// or by explicitly defining an inclusive and exclusive lower and upper bound respectively.
 ///
-/// [`TypedExtract`] consumes `Self` returning the specified elements, borrows `&Self`,
+/// [`TypedExtract::extract`] consumes `Self` returning the specified elements, borrows `&Self`,
 /// returning element references, and mutably borrow `&mut Self` returning mutable element
 /// references.
 ///
 /// ```rust
 /// # use typed_tuple::TypedExtract;
 /// let mut tuple = (0u8, 1u16, 2u32);
-///
 /// let element_ref: (&u16,) = (&tuple).extract();
 /// let element_mut: (&mut u16,) = (&mut tuple).extract();
 /// let element: (u16,) = tuple.extract();
 /// ```
 ///
-/// ## Type pattern extraction
+/// ## Extract by type
 ///
 /// An inferred **unique** tuple pattern can be extracted without providing an explicit
 /// index/indices. For non-unique tuple patterns, providing either (or both) the `INDEX_START`
@@ -28,22 +27,14 @@ use typed_tuple_macros::impl_typed_extract;
 /// ```rust
 /// # use typed_tuple::TypedExtract;
 /// let tuple = (0u8, 1u16, 2u32, 3u64, 4u128, 5u8, 6u16, 7u32);
-///
-/// // Get the 3 elements starting from type `u16`.
-/// let extracted: (u16, _, _) = tuple.extract();
+/// let extracted: (u16, _, _) = tuple.extract(); // Get the 3 elements starting from type `u16`.
 /// assert_eq!(extracted, (1, 2, 3));
-///
-/// // Get the 3 elements ending at type `u128`.
-/// let extracted: (_, _, u128) = tuple.extract();
+/// let extracted: (_, _, u128) = tuple.extract(); // Get the 3 elements ending at type `u128`.
 /// assert_eq!(extracted, (2, 3, 4));
 ///
-/// // Get 3 elements starting from type `u16`. Specify index `8` as the (exclusive) end index.
-/// // Either (or both) a lower or upper bound must be specified as `(u16, _)` is not a unique pattern.
-/// let extracted: (u16, _,) = TypedExtract::<_, 8, _>::extract(tuple);
-/// assert_eq!(extracted, (6, 7));
 /// ```
 ///
-/// ## Index (range) extraction
+/// ## Extract by index (range)
 ///
 /// Where a tuple pattern is not inferred, both the `INDEX_START` and `INDEX_END` arguments
 /// must be specified. Indices are representative of an inclusive and exclusive lower and upper
@@ -52,18 +43,16 @@ use typed_tuple_macros::impl_typed_extract;
 /// ```rust
 /// # use typed_tuple::TypedExtract;
 /// let tuple = (0u8, 1u16, 2u32, 3u64, 4u128, 5u8, 6u16, 7u32);
-///
-/// // Get elements of the index range `1..4`.
-/// let extracted = TypedExtract::<1, 4, _>::extract(tuple);
+/// let extracted = TypedExtract::<1, 4, _>::extract(tuple); // Get elements of the index range `1..4`.
 /// assert_eq!(extracted, (1, 2, 3));
-///
-/// // Get elements of the index range `2..6`.
-/// let extracted = TypedExtract::<2, 6, _>::extract(tuple);
+/// let extracted = TypedExtract::<2, 6, _>::extract(tuple); // Get elements of the index range `2..6`.
 /// assert_eq!(extracted, (2, 3, 4, 5));
+/// let extracted: (_, _,) = TypedExtract::<_, 8, _>::extract(tuple); // Get the 2 elements ending at the (exclusive) index 8.
+/// assert_eq!(extracted, (6, 7));
 /// ```
 pub trait TypedExtract<const INDEX_START: usize, const INDEX_END: usize, T>: Sized {
     /// Extract sequentual elements inferred by a type pattern and/or indices.
-    /// See the documentation of [`TypedExtract`] for usage.
+    /// See [`TypedExtract`] for extended documentation.
     ///
     /// # Example
     /// ```
@@ -73,7 +62,6 @@ pub trait TypedExtract<const INDEX_START: usize, const INDEX_END: usize, T>: Siz
     /// // Infer an element segment.
     /// let extracted: (u16, _, _) = tuple.extract();
     /// assert_eq!(extracted, (1, 2, 3));
-    ///
     /// // Specify an element segment by index range (2..6).
     /// let extracted = TypedExtract::<2, 6, _>::extract(tuple);
     /// assert_eq!(extracted, (2, 3, 4, 5));

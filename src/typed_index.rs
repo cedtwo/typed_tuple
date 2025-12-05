@@ -12,7 +12,6 @@ use typed_tuple_macros::impl_typed_index;
 /// ```rust
 /// # use typed_tuple::TypedIndex;
 /// let mut tuple = (0u8, 1u16, 2u32);
-///
 /// let el_ref: &u16 = (&tuple).get();
 /// let el_mut: &mut u16 = (&mut tuple).get();
 /// let el: u16 = tuple.get();
@@ -20,14 +19,12 @@ use typed_tuple_macros::impl_typed_index;
 ///
 /// ## Get by type
 ///
-/// An index is inferred by either specifying, or inferring the element type.
+/// An index is inferred by either specifying, or inferring a *unique* element type.
 ///
 /// ```rust
 /// # use typed_tuple::TypedIndex;
 /// let tuple = (0u8, 1u16, 2u32, 3u64, 4u128);
-///
-/// // Get the unique `u64` element.
-/// let element: u64 = tuple.get();
+/// let element: u64 = tuple.get(); // Get the unique `u64` element.
 /// assert_eq!(element, 3);
 /// ```
 ///
@@ -38,13 +35,12 @@ use typed_tuple_macros::impl_typed_index;
 /// ```rust
 /// # use typed_tuple::TypedIndex;
 /// let tuple = (0u8, 1u16, 2u32, 3u64, 4u128);
-///
-/// // Split at index 3.
-/// let element = TypedIndex::<3, _>::get(tuple);
+/// let element = TypedIndex::<3, _>::get(tuple); // Split at index 3.
 /// assert_eq!(element, 3);
 /// ```
 pub trait TypedIndex<const INDEX: usize, T> {
     /// Get a reference to the element of type `T`.
+    ///
     /// # Example
     /// ```
     /// # use typed_tuple::TypedIndex;
