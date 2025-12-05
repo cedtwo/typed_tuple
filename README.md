@@ -1,9 +1,7 @@
-# typed_tuple
-
-## Typed Tuple
+# Typed Tuple
 Type based operations on primitive tuple elements.
 
-### Functionality
+## Functionality
 
 `typed_tuple` allows for type safe operations on primitive tuple elements
 without specifying an index. The main purpose of this crate is to simplfy
@@ -27,7 +25,7 @@ if let Some(element) = tuple.get() { std::hint::black_box::<Type2>(*element); }
 assert_eq!(tuple, (10, Some(Type0), None, Some(Type2)));
 ```
 
-### Limitations
+## Limitations
 
 - Fields of the same type must still specify a constant index. This can be specified
 with, for example, `TypedTuple::<1, _>::get(&tuple)` where `1` is the element index,
@@ -37,5 +35,3 @@ obvious. Prefer `let a: usize = tuple.get()` over `let a = tuple.get()`.
 - `TypedTuple` is implemented on tuples of up to 12 elements in length. This was chosen
 as it is the limit of many tuple trait implementations (`PartialEq`, `Eq`, etc.),
 however can be extended to support a higher number of elements if needed.
-
-License: MIT OR Apache-2.0
