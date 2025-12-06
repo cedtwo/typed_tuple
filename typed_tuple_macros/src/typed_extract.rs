@@ -9,7 +9,7 @@ pub(super) fn impl_typed_extract(n: usize, indices: &Vec<Index>, generics: &Vec<
 
     (0..n).fold(TokenStream::new(), |mut stream, i| {
 
-        (i..=n).for_each(|j| {
+        (i + 1..=n).for_each(|j| {
             let index_start = &indices[i];
             let index_end = &indices[j];
 
