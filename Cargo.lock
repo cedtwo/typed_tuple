@@ -41,6 +41,8 @@ dependencies = [
 [[package]]
 name = "typed_tuple_macros"
 version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8c9ac324c6ac881a16c4d2d57ae96cc5905fe112b9d6baf5d8423de237cd0c20"
 dependencies = [
  "proc-macro2",
  "quote",
