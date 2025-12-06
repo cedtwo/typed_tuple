@@ -1,24 +1,31 @@
 use proc_macro::TokenStream;
-use quote::{format_ident, quote};
-use syn::Index;
+use quote::quote;
+use syn::{Ident, Index};
 
 /// Implement `TypedSplit` for a tuple of `n` elements.
-pub(super) fn impl_typed_split(n: usize) -> TokenStream {
-    let indices = (0..n + 1).map(|i| Index::from(i)).collect::<Vec<_>>();
-    let generics = (0..n).map(|i| format_ident!("T{i}")).collect::<Vec<_>>();
+pub(super) fn impl_typed_split(
+    n: usize,
+    indices: &Vec<Index>,
+    generics: &Vec<Ident>,
+) -> TokenStream {
+    let indices = &indices[0..n + 1];
+    let generics = &generics[0..n];
 
     (0..n + 1).fold(TokenStream::new(), |mut stream, i| {
         let index = &indices[i];
 
-        let idx_left = (0..i).map(|i| Index::from(i)).collect::<Vec<_>>();
-        let idx_right = (i..n).map(|i| Index::from(i)).collect::<Vec<_>>();
+        let (idx_left, idx_right) = indices[..n].split_at(i);
+        let (gen_left, gen_right) = generics[..n].split_at(i);
 
-        let generic_left = generics.iter().take(i).collect::<Vec<_>>();
-        let generic_right = generics.iter().skip(i).collect::<Vec<_>>();
+        let all_generics = quote! { #( #generics, )* };
+
+        let return_ty_args_own = quote! { ( #( #gen_left, )* ), ( #( #gen_right, )* ) };
+        let return_ty_inner_ref = quote! { ( #( &'a #gen_left, )* ), ( #( &'a #gen_right, )* ) };
+        let return_ty_inner_mut = quote! { ( #( &'a mut #gen_left, )* ), ( #( &'a mut #gen_right, )* ) };
 
         stream.extend(TokenStream::from(quote! {
-            impl< #( #generics ),* > TypedSplit< #index, ( #( #generic_left, )* ), ( #( #generic_right, )* )> for ( #( #generics, )* ) {
-                fn split(self) -> (( #( #generic_left, )* ), ( #( #generic_right, )* )) {
+            impl< #all_generics > TypedSplit< #index, #return_ty_args_own > for ( #all_generics ) {
+                fn split(self) -> ( #return_ty_args_own ) {
                     (
                         ( #( self.#idx_left, )* ),
                         ( #( self.#idx_right, )* )
@@ -26,8 +33,8 @@ pub(super) fn impl_typed_split(n: usize) -> TokenStream {
                 }
             }
 
-            impl<'a,  #( #generics ),* > TypedSplit< #index, ( #( &'a #generic_left, )* ), ( #( &'a #generic_right, )* )> for &'a ( #( #generics, )* ) {
-                fn split(self) -> (( #( &'a #generic_left, )* ), ( #( &'a #generic_right, )* )) {
+            impl<'a, #all_generics > TypedSplit< #index, #return_ty_inner_ref > for &'a ( #all_generics ) {
+                fn split(self) -> ( #return_ty_inner_ref ) {
                     (
                         ( #( &self.#idx_left, )* ),
                         ( #( &self.#idx_right, )* )
@@ -35,8 +42,8 @@ pub(super) fn impl_typed_split(n: usize) -> TokenStream {
                 }
             }
 
-            impl<'a,  #( #generics ),* > TypedSplit< #index, ( #( &'a mut #generic_left, )* ), ( #( &'a mut #generic_right, )* )> for &'a mut ( #( #generics, )* ) {
-                fn split(self) -> (( #( &'a mut #generic_left, )* ), ( #( &'a mut #generic_right, )* )) {
+            impl<'a, #all_generics > TypedSplit< #index, #return_ty_inner_mut > for &'a mut ( #all_generics ) {
+                fn split(self) -> ( #return_ty_inner_mut ) {
                     (
                         ( #( &mut self.#idx_left, )* ),
                         ( #( &mut self.#idx_right, )* )

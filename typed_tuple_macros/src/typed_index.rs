@@ -1,32 +1,38 @@
 use proc_macro::TokenStream;
-use quote::{format_ident, quote};
-use syn::Index;
+use quote::quote;
+use syn::{Ident, Index};
 
 /// Implement `TypedIndex` for a tuple of `n` elements.
-pub(super) fn impl_typed_index(n: usize) -> TokenStream {
-    let indices = (0..n).map(|i| Index::from(i)).collect::<Vec<_>>();
-    let generics = (0..n).map(|i| format_ident!("T{i}")).collect::<Vec<_>>();
+pub(super) fn impl_typed_index(
+    n: usize,
+    indices: &Vec<Index>,
+    generics: &Vec<Ident>,
+) -> TokenStream {
+    let indices = &indices[..n];
+    let generics = &generics[..n];
 
     (0..n).fold(TokenStream::new(), |mut stream, i| {
-        let index = &indices[i];
-        let generic = &generics[i as usize];
+        let idx = &indices[i];
+        let gen_ty = &generics[i];
+
+        let all_generics = quote! { #( #generics, )* };
 
         stream.extend(TokenStream::from(quote! {
-            impl< #( #generics ),* > TypedIndex< #index, #generic> for ( #( #generics, )* ) {
-                fn get(self) -> #generic {
-                    self.#index
+            impl< #all_generics > TypedIndex< #idx, #gen_ty> for ( #all_generics ) {
+                fn get(self) -> #gen_ty {
+                    self.#idx
                 }
             }
 
-            impl<'a, #( #generics ),* > TypedIndex< #index, &'a #generic> for &'a ( #( #generics, )* ) {
-                fn get(self) -> &'a #generic {
-                    &self.#index
+            impl<'a, #all_generics > TypedIndex< #idx, &'a #gen_ty> for &'a ( #all_generics ) {
+                fn get(self) -> &'a #gen_ty {
+                    &self.#idx
                 }
             }
 
-            impl<'a, #( #generics ),* > TypedIndex< #index, &'a mut #generic> for &'a mut ( #( #generics, )* ) {
-                fn get(self) -> &'a mut #generic {
-                    &mut self.#index
+            impl<'a, #all_generics > TypedIndex< #idx, &'a mut #gen_ty> for &'a mut ( #all_generics ) {
+                fn get(self) -> &'a mut #gen_ty {
+                    &mut self.#idx
                 }
             }
         }));

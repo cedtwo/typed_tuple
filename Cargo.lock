@@ -42,6 +42,7 @@ dependencies = [
 name = "typed_tuple_macros"
 version = "0.1.0"
 dependencies = [
+ "proc-macro2",
  "quote",
  "syn",
 ]

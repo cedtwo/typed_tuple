@@ -1,11 +1,11 @@
 use proc_macro::TokenStream;
-use quote::{format_ident, quote};
-use syn::Index;
+use quote::{quote};
+use syn::{Ident, Index};
 
 /// Implement `TypedExtract` for a tuple of `n` elements.
-pub(super) fn impl_typed_extract(n: usize) -> TokenStream {
-    let indices = (0..n + 1).map(|i| Index::from(i)).collect::<Vec<_>>();
-    let generics = (0..n).map(|i| format_ident!("T{i}")).collect::<Vec<_>>();
+pub(super) fn impl_typed_extract(n: usize, indices: &Vec<Index>, generics: &Vec<Ident>) -> TokenStream {
+    let indices = &indices[..n + 1];
+    let generics = &generics[..n];
 
     (0..n).fold(TokenStream::new(), |mut stream, i| {
 
@@ -13,25 +13,31 @@ pub(super) fn impl_typed_extract(n: usize) -> TokenStream {
             let index_start = &indices[i];
             let index_end = &indices[j];
 
-            let idx_range= &indices[i..j];
-            let generic_range = &generics[i..j];
+            let extract_range_idx = &indices[i..j];
+            let extract_range_gen = &generics[i..j];
+
+            let all_generics = quote! { #( #generics, )* };
+
+            let return_ty_own = quote! { ( #( #extract_range_gen, )* ) };
+            let return_ty_ref = quote! { ( #( &'a #extract_range_gen, )* ) };
+            let return_ty_mut = quote! { ( #( &'a mut #extract_range_gen, )* ) };
 
             stream.extend(TokenStream::from(quote! {
-                impl< #( #generics ),* > TypedExtract< #index_start, #index_end, ( #( #generic_range, )* )> for ( #( #generics, )* ) {
-                    fn extract(self) -> ( #( #generic_range, )* ) {
-                        ( #( self.#idx_range, )* )
+                impl< #all_generics > TypedExtract< #index_start, #index_end, #return_ty_own > for ( #all_generics ) {
+                    fn extract(self) -> #return_ty_own {
+                        ( #( self.#extract_range_idx, )* )
                     }
                 }
 
-                impl<'a,  #( #generics ),* > TypedExtract< #index_start, #index_end, ( #( &'a #generic_range, )* )> for &'a ( #( #generics, )* ) {
-                    fn extract(self) -> ( #( &'a #generic_range, )* ) {
-                        ( #( &self.#idx_range, )* )
+                impl<'a, #all_generics > TypedExtract< #index_start, #index_end, #return_ty_ref > for &'a ( #all_generics ) {
+                    fn extract(self) -> #return_ty_ref {
+                        ( #( &self.#extract_range_idx, )* )
                     }
                 } 
 
-                impl<'a,  #( #generics ),* > TypedExtract< #index_start, #index_end, ( #( &'a mut #generic_range, )* )> for &'a mut ( #( #generics, )* ) {
-                    fn extract(self) -> ( #( &'a mut #generic_range, )* ) {
-                        ( #( &mut self.#idx_range, )* )
+                impl<'a, #all_generics > TypedExtract< #index_start, #index_end, #return_ty_mut > for &'a mut ( #all_generics ) {
+                    fn extract(self) -> #return_ty_mut {
+                        ( #( &mut self.#extract_range_idx, )* )
                     }
                 } 
             }));

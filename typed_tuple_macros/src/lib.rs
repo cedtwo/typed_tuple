@@ -1,6 +1,7 @@
 extern crate proc_macro;
 
 use proc_macro::TokenStream;
+use quote::format_ident;
 use syn::*;
 
 mod typed_extract;
@@ -17,10 +18,15 @@ mod typed_split;
 #[proc_macro]
 pub fn impl_typed_index(item: TokenStream) -> TokenStream {
     match parse_int(item).map_err(|e| e.into_compile_error()) {
-        Ok(n) => (0..n + 1).fold(TokenStream::new(), |mut stream, i| {
-            stream.extend(typed_index::impl_typed_index(i));
-            stream
-        }),
+        Ok(n) => {
+            let indices = indices(n);
+            let generics = generics(n);
+
+            (0..n + 1).fold(TokenStream::new(), |mut stream, i| {
+                stream.extend(typed_index::impl_typed_index(i, &indices, &generics));
+                stream
+            })
+        }
         Err(e) => e.into(),
     }
 }
@@ -35,10 +41,15 @@ pub fn impl_typed_index(item: TokenStream) -> TokenStream {
 #[proc_macro]
 pub fn impl_typed_split(item: TokenStream) -> TokenStream {
     match parse_int(item).map_err(|e| e.into_compile_error()) {
-        Ok(n) => (1..n + 1).fold(TokenStream::new(), |mut stream, i| {
-            stream.extend(typed_split::impl_typed_split(i));
-            stream
-        }),
+        Ok(n) => {
+            let indices = indices(n);
+            let generics = generics(n);
+
+            (1..n + 1).fold(TokenStream::new(), |mut stream, i| {
+                stream.extend(typed_split::impl_typed_split(i, &indices, &generics));
+                stream
+            })
+        }
         Err(e) => e.into(),
     }
 }
@@ -53,10 +64,15 @@ pub fn impl_typed_split(item: TokenStream) -> TokenStream {
 #[proc_macro]
 pub fn impl_typed_extract(item: TokenStream) -> TokenStream {
     match parse_int(item).map_err(|e| e.into_compile_error()) {
-        Ok(n) => (0..n + 1).fold(TokenStream::new(), |mut stream, i| {
-            stream.extend(typed_extract::impl_typed_extract(i));
-            stream
-        }),
+        Ok(n) => {
+            let indices = indices(n);
+            let generics = generics(n);
+
+            (0..n + 1).fold(TokenStream::new(), |mut stream, i| {
+                stream.extend(typed_extract::impl_typed_extract(i, &indices, &generics));
+                stream
+            })
+        }
         Err(e) => e.into(),
     }
 }
@@ -68,4 +84,12 @@ fn parse_int(item: TokenStream) -> syn::Result<usize> {
         Lit::Int(int) => int.base10_parse(),
         _ => Err(syn::Error::new_spanned(lit, "Expected integer literal")),
     }
+}
+
+fn indices(n: usize) -> Vec<Index> {
+    (0..n + 1).map(|i| Index::from(i)).collect()
+}
+
+fn generics(n: usize) -> Vec<Ident> {
+    (0..n + 1).map(|i| format_ident!("T{i}")).collect()
 }
