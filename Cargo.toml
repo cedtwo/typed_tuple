@@ -1,7 +1,7 @@
 [package]
 name = "typed_tuple"
 authors = ["Christopher Edward Dawn"]
-version = "0.1.0"
+version = "0.2.0"
 edition = "2024"
 description = "Type-safe access, isolation and mutation of primitive tuple segments and elements."
 readme = "README.md"
