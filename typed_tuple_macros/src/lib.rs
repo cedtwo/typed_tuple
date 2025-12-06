@@ -12,9 +12,7 @@ mod typed_split;
 /// integer literal.
 ///
 /// # Example
-/// ```
-/// impl_typed_index!(12); // Implement on tuples of 1 to 12 fields.
-/// ```
+/// `impl_typed_index!(12); // Implement on tuples of 1 to 12 fields.`
 #[proc_macro]
 pub fn impl_typed_index(item: TokenStream) -> TokenStream {
     match parse_int(item).map_err(|e| e.into_compile_error()) {
@@ -35,9 +33,7 @@ pub fn impl_typed_index(item: TokenStream) -> TokenStream {
 /// integer literal.
 ///
 /// # Example
-/// ```
-/// impl_typed_bound!(12); // Implement on tuples of 1 to 12 fields.
-/// ```
+/// `impl_typed_split!(12); // Implement on tuples of 1 to 12 fields.`
 #[proc_macro]
 pub fn impl_typed_split(item: TokenStream) -> TokenStream {
     match parse_int(item).map_err(|e| e.into_compile_error()) {
@@ -58,9 +54,7 @@ pub fn impl_typed_split(item: TokenStream) -> TokenStream {
 /// integer literal.
 ///
 /// # Example
-/// ```
-/// impl_typed_extract!(12); // Implement on tuples of 1 to 12 fields.
-/// ```
+/// `impl_typed_extract!(12); // Implement on tuples of 1 to 12 fields.`
 #[proc_macro]
 pub fn impl_typed_extract(item: TokenStream) -> TokenStream {
     match parse_int(item).map_err(|e| e.into_compile_error()) {
