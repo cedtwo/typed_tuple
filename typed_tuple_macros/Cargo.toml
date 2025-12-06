@@ -1,7 +1,11 @@
 [package]
 name = "typed_tuple_macros"
+authors = ["Christopher Edward Dawn"]
 version = "0.1.0"
 edition = "2024"
+description = "Macro generation for the typed_tuple crate"
+repository = "https://github.com/cedtwo/typed_tuple.git"
+license = "MIT OR Apache-2.0"
 
 [lib]
 proc-macro = true
