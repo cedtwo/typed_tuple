@@ -33,7 +33,7 @@ dependencies = [
 
 [[package]]
 name = "typed_tuple"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "typed_tuple_macros",
 ]
