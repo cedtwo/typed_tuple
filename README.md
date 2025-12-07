@@ -57,8 +57,10 @@ index operations.
 # use typed_tuple::{TypedSplit};
 let mut tuple = (0u8, 1u16, 2u32, 3u64, 4u128);
 
-let (left_inferred, right_inferred): (_, (_,)) = tuple.split(); // Split the last element off the tuple.
-let (left_explicit, right_explicit) = TypedSplit::<4, _, _>::split(tuple); // Split the tuple at index 4 (left-exclusive).
+// Split the last element off the tuple.
+let (left_inferred, right_inferred): (_, (_,)) = tuple.split();
+// Split the tuple at index 4 (left-exclusive).
+let (left_explicit, right_explicit) = TypedSplit::<4, _, _>::split(tuple);
 
 assert_eq!(left_inferred, left_explicit);
 assert_eq!(right_inferred, right_explicit);
@@ -75,6 +77,17 @@ Tuple State | Element State | Behaviour | Example
 `Self` | `T` | Consume the tuple returning owned element(s) | `tuple.get()`
 `&Self` | `&T` | Borrow the tuple returning borrowed element(s) | `(&tuple).get()`
 `&mut Self` | `&mut T` | Borrow the tuple returning mutable borrowed element(s) | `(&mut tuple).get()`
+
+## Features
+
+Functionality can be enabled/disabled through the following features (all enabled
+by default).
+
+Feature | Description | Exposed Type
+---|---|---
+`index` | Enables retrieving an element by type/index. | [`TypedIndex`]
+`split` | Enables splitting a tuple by type/index. | [`TypedSplit`]
+`extract` | Enables extracting a tuple segment by type/indices. | [`TypedExtract`]
 
 ## Limitations
 

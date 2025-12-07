@@ -10,5 +10,11 @@ license = "MIT OR Apache-2.0"
 keywords = ["tuple", "type", "typed", "heterogenous"]
 categories = ["data-structures", "rust-patterns"]
 
+[features]
+default = ["index", "split", "extract"]
+index = []
+split = []
+extract = []
+
 [dependencies]
 typed_tuple_macros = "0.1.0"
